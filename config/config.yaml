@@ -12,7 +12,7 @@ model:
   dropout: 0.4
 
 training:
-  num_epochs: 50
+  num_epochs: 15
   lr: 3.0e-4
   weight_decay: 1.0e-4
   label_smoothing: 0.1
