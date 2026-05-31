@@ -1,0 +1,17 @@
+{
+  "standard": {
+    "accuracy": 0.08,
+    "macro_f1": 0.05,
+    "per_class_f1": {
+      "Spiral Galaxy": 0.0,
+      "Elliptical Galaxy": 0.0,
+      "Nebula": 0.0,
+      "Star Cluster": 0.0,
+      "Planetary Object": 0.25
+    }
+  },
+  "tta": {
+    "accuracy": 0.16,
+    "macro_f1": 0.08421052631578947
+  }
+}

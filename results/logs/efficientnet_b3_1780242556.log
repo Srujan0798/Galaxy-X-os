@@ -1,0 +1,16 @@
+2026-05-31 21:19:16,440 | INFO     | ======================================================================
+2026-05-31 21:19:16,441 | INFO     | SCALE x ODYSSEY -- Training Started
+2026-05-31 21:19:16,441 | INFO     | Device: cpu | Backbone: efficientnet_b3 | Epochs: 1
+2026-05-31 21:19:16,441 | INFO     | Batch: 4 | LR: 0.0003 | AMP: True
+2026-05-31 21:19:16,441 | INFO     | ======================================================================
+2026-05-31 21:19:16,652 | INFO     | Loading pretrained weights from Hugging Face hub (timm/efficientnet_b3.ra2_in1k)
+2026-05-31 21:19:17,110 | INFO     | HTTP Request: HEAD https://huggingface.co/timm/efficientnet_b3.ra2_in1k/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+2026-05-31 21:19:17,111 | WARNING  | Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-05-31 21:19:17,113 | INFO     | [timm/efficientnet_b3.ra2_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+2026-05-31 21:19:17,236 | INFO     | Loaded class weights: {'spiral_galaxy': 1.0, 'elliptical_galaxy': 1.0, 'nebula': 1.0, 'star_cluster': 1.0, 'planetary': 1.0}
+2026-05-31 21:19:17,241 | INFO     | [Epoch 1] Phase 1: Backbone FROZEN | Head LR = 3.00e-03
+2026-05-31 21:20:52,849 | INFO     | [Epoch 01/1] 95.6s | LR: 1.56e-04 | Train Loss: 11.2465 Acc: 0.1900 | Val Loss: 10.5657 Acc: 0.1600 F1: 0.1333
+2026-05-31 21:20:53,138 | INFO     |   *** New best model saved! (val_acc=0.1600) ***
+2026-05-31 21:20:53,138 | INFO     | ======================================================================
+2026-05-31 21:20:53,138 | INFO     | Training Complete! Best Val Accuracy: 0.1600
+2026-05-31 21:20:53,138 | INFO     | ======================================================================

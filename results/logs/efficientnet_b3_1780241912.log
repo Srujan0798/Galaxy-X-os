@@ -1,0 +1,18 @@
+2026-05-31 21:08:32,519 | INFO     | ======================================================================
+2026-05-31 21:08:32,520 | INFO     | SCALE x ODYSSEY -- Training Started
+2026-05-31 21:08:32,520 | INFO     | Device: cpu | Backbone: efficientnet_b3 | Epochs: 2
+2026-05-31 21:08:32,520 | INFO     | Batch: 8 | LR: 0.0003 | AMP: True
+2026-05-31 21:08:32,520 | INFO     | ======================================================================
+2026-05-31 21:08:32,739 | INFO     | Loading pretrained weights from Hugging Face hub (timm/efficientnet_b3.ra2_in1k)
+2026-05-31 21:08:33,124 | INFO     | HTTP Request: HEAD https://huggingface.co/timm/efficientnet_b3.ra2_in1k/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+2026-05-31 21:08:33,125 | WARNING  | Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-05-31 21:08:33,126 | INFO     | [timm/efficientnet_b3.ra2_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+2026-05-31 21:08:33,260 | INFO     | Loaded class weights: {'spiral_galaxy': 1.0, 'elliptical_galaxy': 1.0, 'nebula': 1.0, 'star_cluster': 1.0, 'planetary': 1.0}
+2026-05-31 21:08:33,263 | INFO     | [Epoch 1] Phase 1: Backbone FROZEN | Head LR = 3.00e-03
+2026-05-31 21:10:13,661 | INFO     | [Epoch 01/2] 100.4s | LR: 1.56e-04 | Train Loss: 10.9041 Acc: 0.2450 | Val Loss: 5.2390 Acc: 0.4400 F1: 0.3332
+2026-05-31 21:10:14,071 | INFO     |   *** New best model saved! (val_acc=0.4400) ***
+2026-05-31 21:10:14,074 | INFO     | [Epoch 2] Phase 2: Full fine-tuning | Backbone LR = 3.00e-05, Head LR = 3.00e-04
+2026-05-31 21:13:46,876 | INFO     | [Epoch 02/2] 212.8s | LR: 5.42e-06 | Train Loss: 10.2571 Acc: 0.2650 | Val Loss: 6.1953 Acc: 0.2800 F1: 0.2229
+2026-05-31 21:13:46,908 | INFO     | ======================================================================
+2026-05-31 21:13:46,908 | INFO     | Training Complete! Best Val Accuracy: 0.4400
+2026-05-31 21:13:46,908 | INFO     | ======================================================================
