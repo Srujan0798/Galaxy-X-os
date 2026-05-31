@@ -46,7 +46,7 @@ class AddAstroNoise(A.ImageOnlyTransform):
 
     def __init__(self, gaussian_sigma_limit=(5, 25),
                  poisson_scale_limit=(10, 50), always_apply=False, p=0.4):
-        super().__init__(always_apply=always_apply, p=p)
+        super().__init__(p=p)
         self.gaussian_sigma_limit = gaussian_sigma_limit
         self.poisson_scale_limit = poisson_scale_limit
 
@@ -68,7 +68,7 @@ class SimulateCosmicRay(A.ImageOnlyTransform):
 
     def __init__(self, num_streaks_limit=(1, 4), brightness_limit=(200, 255),
                  width_limit=(1, 3), always_apply=False, p=0.15):
-        super().__init__(always_apply=always_apply, p=p)
+        super().__init__(p=p)
         self.num_streaks_limit = num_streaks_limit
         self.brightness_limit = brightness_limit
         self.width_limit = width_limit
@@ -97,7 +97,7 @@ class SimulateVignetting(A.ImageOnlyTransform):
     """Simulate telescope vignetting -- darker edges."""
 
     def __init__(self, strength_limit=(0.1, 0.4), always_apply=False, p=0.2):
-        super().__init__(always_apply=always_apply, p=p)
+        super().__init__(p=p)
         self.strength_limit = strength_limit
 
     def apply(self, img, **params):
@@ -128,11 +128,11 @@ def get_train_transforms(image_size: int = 224) -> A.Compose:
         A.RandomRotate90(p=0.5),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.3),
-        A.RandomResizedCrop(height=image_size, width=image_size,
+        A.RandomResizedCrop(size=(image_size, image_size),
                             scale=(0.5, 1.0), ratio=(0.75, 1.33),
                             interpolation=cv2.INTER_LANCZOS4, p=0.6),
         A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.15, rotate_limit=45,
-                           border_mode=cv2.BORDER_CONSTANT, value=0, p=0.5),
+                           border_mode=cv2.BORDER_CONSTANT, fill=0, p=0.5),
         A.RandomBrightnessContrast(brightness_limit=(-0.3, 0.3),
                                    contrast_limit=(-0.3, 0.3), p=0.6),
         A.RandomGamma(gamma_limit=(70, 130), p=0.3),
@@ -141,8 +141,10 @@ def get_train_transforms(image_size: int = 224) -> A.Compose:
         AddAstroNoise(p=0.4),
         SimulateCosmicRay(p=0.15),
         SimulateVignetting(p=0.2),
-        A.CoarseDropout(max_holes=12, max_height=4, max_width=4,
-                        min_holes=2, fill_value=0, p=0.3),
+        A.CoarseDropout(num_holes_range=(2, 12),
+                        hole_height_range=(4, 4),
+                        hole_width_range=(4, 4),
+                        fill=0, p=0.3),
         A.MotionBlur(blur_limit=5, p=0.15),
         A.GaussianBlur(blur_limit=3, sigma_limit=1.0, p=0.15),
         A.Resize(height=image_size, width=image_size, p=1.0),
