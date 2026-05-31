@@ -1,27 +1,24 @@
-# SCALE x ODYSSEY -- Central Configuration
 data:
-  raw_dir: "data/raw"
-  processed_dir: "data/processed"
-  image_size: 224
   batch_size: 32
+  image_size: 224
   num_workers: 4
-
+  processed_dir: data/processed
+  raw_dir: data/raw
 model:
-  backbone: "efficientnet_b3"
-  num_classes: 5
+  backbone: efficientnet_b3
   dropout: 0.4
-
-training:
-  num_epochs: 50
-  lr: 3.0e-4
-  weight_decay: 1.0e-4
-  label_smoothing: 0.1
-  patience: 12
-  mixed_precision: true
-  freeze_backbone_epochs: 3
-
+  num_classes: 5
 paths:
-  checkpoints: "checkpoints"
-  results: "results"
-  logs: "results/logs"
-  gradcam_dir: "results/gradcam"
+  checkpoints: checkpoints
+  gradcam_dir: results/gradcam
+  logs: results/logs
+  results: results
+training:
+  batch_size: 32
+  freeze_backbone_epochs: 3
+  label_smoothing: 0.1
+  lr: 0.0003
+  mixed_precision: true
+  num_epochs: 50
+  patience: 12
+  weight_decay: 0.0001

@@ -25,6 +25,7 @@ import seaborn as sns
 from dataset import AstroDataset, CLASS_NAMES_DISPLAY, get_val_transforms
 from model import AstroClassifier
 from utils import load_config, load_checkpoint, compute_metrics
+from PIL import Image
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
