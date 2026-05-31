@@ -36,7 +36,7 @@ def set_seed(seed: int = 42):
 # Config
 # ---------------------------------------------------------------------------
 
-def load_config(config_path: str = "configs/config.yaml") -> Dict:
+def load_config(config_path: str = "config/config.yaml") -> Dict:
     """Load YAML configuration."""
     with open(config_path) as f:
         return yaml.safe_load(f)

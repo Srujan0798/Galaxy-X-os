@@ -1,32 +1,38 @@
-# Task: Record Demo Video
+# T5.2: Demo Video Recording Prep
 
-## Context
-2-minute demo video is required for submission.
+## Pre-Recording Checklist
 
-## Goal
-Record a professional 2-minute demo following Demo_Video_Script.md.
+Before recording, ensure:
 
-## Script Sections
-1. 00:00-00:05: Title card
-2. 00:05-00:30: Web demo upload + prediction
-3. 00:30-00:45: Second example (different class)
-4. 00:45-00:55: Grad-CAM summary grid
-5. 00:55-01:10: Fast inference CLI
-6. 01:10-01:20: Bonus features
-7. 01:20-01:35: Evaluation results
-8. 01:35-01:50: Training highlights
-9. 01:50-02:00: Closing slide
+- [ ] All evaluation outputs exist in `results/`
+- [ ] Grad-CAM samples generated in `results/gradcam/`
+- [ ] Streamlit app runs without errors: `streamlit run app/app.py`
+- [ ] Training logs present in `results/logs/`
+- [ ] Checkpoint verified: `python -c "from src.inference import ModelManager; m = ModelManager()"`
 
-## Acceptance Criteria
-- [ ] 1:50-2:00 duration
-- [ ] 1920x1080 resolution
-- [ ] Clear narration
-- [ ] All sections covered
-- [ ] Export as MP4 (H.264, ~10MB)
+## Recording Setup
 
-## Files to Create
-- `deliverables/demo/demo_video.mp4`
+1. **Screen Resolution**: 1920x1080 (1080p)
+2. **Recording Software**: OBS Studio or Loom
+3. **Audio**: External mic recommended, speak clearly at moderate pace
+4. **Timer**: Keep total under 2:00
 
-## Notes
-Use OBS Studio or Loom.
-Have Streamlit running before recording.
+## Scene Breakdown
+
+| Time | Scene | Action |
+|------|-------|--------|
+| 0:00-0:05 | Title | Show project name + team |
+| 0:05-0:30 | Web Demo 1 | Upload spiral galaxy, show prediction |
+| 0:30-0:45 | Web Demo 2 | Upload nebula, show prediction |
+| 0:45-0:55 | Grad-CAM Grid | Show `results/gradcam/_summary_grid.png` |
+| 0:55-1:10 | CLI Inference | Run `python src/inference.py data/processed/test/` |
+| 1:10-1:20 | Bonus | Run `python src/bonus.py` sample |
+| 1:20-1:35 | Evaluation | Run `python src/evaluate.py`, show JSON |
+| 1:35-1:50 | Training | Show TensorBoard curves |
+| 1:50-2:00 | Closing | Thank you slide |
+
+## Post-Recording
+
+1. Export as MP4 (H.264, ~10MB for 2 min)
+2. Upload to Google Drive / YouTube
+3. Add link to README.md

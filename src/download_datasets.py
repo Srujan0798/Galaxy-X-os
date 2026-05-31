@@ -85,12 +85,42 @@ DATASETS = {
 SPLITS = {"train": 0.80, "val": 0.10, "test": 0.10}
 
 
+def check_kaggle_setup() -> bool:
+    """Check if Kaggle CLI and credentials are properly configured."""
+    import subprocess
+
+    try:
+        result = subprocess.run(["kaggle", "--version"], capture_output=True, text=True)
+        if result.returncode != 0:
+            logger.warning("Kaggle CLI not found. Install with: pip install kaggle")
+            return False
+    except FileNotFoundError:
+        logger.warning("Kaggle CLI not found. Install with: pip install kaggle")
+        return False
+
+    kaggle_json = Path.home() / ".kaggle" / "kaggle.json"
+    if not kaggle_json.exists():
+        logger.warning("Kaggle credentials not found.")
+        logger.warning("  1. Go to https://kaggle.com/account -> API -> Create New Token")
+        logger.warning("  2. Save kaggle.json to ~/.kaggle/kaggle.json")
+        logger.warning("  3. Run: chmod 600 ~/.kaggle/kaggle.json")
+        return False
+
+    return True
+
+
 def download_dataset(name: str, kaggle_ref: str, force: bool = False) -> Path:
     """Download and extract a Kaggle dataset."""
     dataset_dir = RAW_DIR / name
 
     if dataset_dir.exists() and any(dataset_dir.iterdir()) and not force:
         logger.info(f"Dataset '{name}' already downloaded. Skipping.")
+        return dataset_dir
+
+    if not check_kaggle_setup():
+        logger.warning(f"Cannot download {name} - Kaggle not configured.")
+        logger.warning(f"  Manual download: https://www.kaggle.com/datasets/{kaggle_ref}")
+        logger.warning(f"  Extract to: {dataset_dir}")
         return dataset_dir
 
     logger.info(f"Downloading '{name}' from Kaggle...")
@@ -354,20 +384,45 @@ def main():
     logger.info("SCALE x ODYSSEY -- Dataset Preparation Pipeline")
     logger.info("=" * 60)
 
-    logger.info("Step 1: Downloading datasets from Kaggle")
-    logger.info("(If downloads fail, manually download and extract to data/raw/)")
+    kaggle_available = check_kaggle_setup()
 
-    for name, config in DATASETS.items():
-        try:
-            download_dataset(name, config["kaggle_ref"], force=False)
-        except Exception as e:
-            logger.warning(f"Download issue with {name}: {e}")
+    if kaggle_available:
+        logger.info("Step 1: Downloading datasets from Kaggle...")
 
-    merged = merge_all_datasets()
-    filtered = filter_dataset(merged)
-    balanced = handle_imbalance(filtered)
-    split_data = create_splits(balanced, SPLITS)
-    copy_to_processed(split_data)
+        for name, config in DATASETS.items():
+            try:
+                download_dataset(name, config["kaggle_ref"], force=False)
+            except Exception as e:
+                logger.warning(f"Download issue with {name}: {e}")
+
+        merged = merge_all_datasets()
+        filtered = filter_dataset(merged)
+        balanced = handle_imbalance(filtered)
+        split_data = create_splits(balanced, SPLITS)
+        copy_to_processed(split_data)
+    else:
+        logger.info("Kaggle not configured. Checking for existing data...")
+
+        merged = merge_all_datasets()
+
+        if not merged or all(len(v) == 0 for v in merged.values()):
+            logger.warning("No raw data found in data/raw/")
+            logger.warning("To download real data:")
+            logger.warning("  1. Install kaggle: pip install kaggle")
+            logger.warning("  2. Get credentials: https://kaggle.com/account/api")
+            logger.warning("  3. Save to: ~/.kaggle/kaggle.json")
+            logger.warning("  4. Run: python src/download_datasets.py")
+            logger.info("\nFalling back to synthetic data generation...")
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent))
+            from generate_synthetic_data import generate_dataset
+            generate_dataset(output_dir="data/processed", samples_per_class=50)
+        else:
+            logger.info("Found existing data. Using available images.")
+            filtered = filter_dataset(merged)
+            balanced = handle_imbalance(filtered)
+            split_data = create_splits(balanced, SPLITS)
+            copy_to_processed(split_data)
 
     logger.info("\nNext step: Run training!")
     logger.info("  python src/train.py")
