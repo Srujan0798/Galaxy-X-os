@@ -1,0 +1,24 @@
+---
+id: 003-dataset-load
+description: Worker can create dataset and dataloader
+type: unit
+capability: data
+---
+
+# Eval: Dataset Load
+
+## Input
+- data/processed/ with train/ subdirectories
+
+## Execution
+1. Create AstroDataset("data/processed", "train")
+2. Check length > 0
+3. Get one sample
+
+## Verification
+- len(dataset) > 0
+- sample is (tensor, label)
+- tensor shape is (3, 224, 224)
+
+## Grader
+code-based: evals/graders/code_based.py::test_dataset_load

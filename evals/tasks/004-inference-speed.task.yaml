@@ -1,0 +1,24 @@
+---
+id: 004-inference-speed
+description: Inference completes in <100ms on CPU
+type: performance
+capability: inference
+---
+
+# Eval: Inference Speed
+
+## Input
+- Trained checkpoint at checkpoints/best_model.pth
+- Single 224x224 image
+
+## Execution
+1. Load ModelManager
+2. Run predict() 10 times
+3. Measure average time
+
+## Verification
+- Average < 100ms on CPU
+- < 15ms on GPU
+
+## Grader
+code-based: evals/graders/code_based.py::test_inference_speed

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agentskills.io/schemas/manifest.v1.json",
+  "skills": {
+    "tdd": "^1.2.0",
+    "code-review": "^2.0.0",
+    "pytorch-patterns": "^1.0.0",
+    "streamlit-apps": "^1.0.0"
+  }
+}

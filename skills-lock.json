@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agentskills.io/schemas/lock.v1.json",
+  "skills": [
+    {
+      "name": "tdd",
+      "version": "1.2.4",
+      "source": "agentskills.io/skills/tdd",
+      "sha256": "abc123..."
+    }
+  ]
+}

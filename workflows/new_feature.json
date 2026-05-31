@@ -1,0 +1,39 @@
+{
+  "$schema": "https://os-setup.io/schemas/workflow.v1.json",
+  "name": "new_feature",
+  "description": "Plan \u2192 implement \u2192 test \u2192 merge a feature",
+  "steps": [
+    {
+      "id": "plan",
+      "skill": "plan-wave",
+      "output": "spec.md"
+    },
+    {
+      "id": "implement",
+      "depends_on": [
+        "plan"
+      ]
+    },
+    {
+      "id": "test",
+      "depends_on": [
+        "implement"
+      ]
+    },
+    {
+      "id": "review",
+      "agent": "verifier",
+      "depends_on": [
+        "test"
+      ]
+    },
+    {
+      "id": "merge",
+      "command": "/merge",
+      "depends_on": [
+        "review"
+      ]
+    }
+  ],
+  "state_file": "orchestrator/memory/states/new_feature-state.json"
+}

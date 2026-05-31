@@ -1,0 +1,7 @@
+name: bugfix
+steps:
+  - diagnose: reproduce bug
+  - write: failing test
+  - fix: minimal change
+  - verify: test passes
+  - merge: update CHANGELOG
