@@ -1,17 +1,17 @@
 {
   "standard": {
-    "accuracy": 0.95,
-    "macro_f1": 0.9492063492063492,
+    "accuracy": 0.6866666666666666,
+    "macro_f1": 0.6767481991291611,
     "per_class_f1": {
-      "Spiral Galaxy": 1.0,
-      "Elliptical Galaxy": 0.8571428571428571,
+      "Spiral Galaxy": 0.37209302325581395,
+      "Elliptical Galaxy": 1.0,
       "Nebula": 1.0,
-      "Star Cluster": 1.0,
-      "Planetary Object": 0.8888888888888888
+      "Star Cluster": 0.45901639344262296,
+      "Planetary Object": 0.5526315789473685
     }
   },
   "tta": {
-    "accuracy": 1.0,
-    "macro_f1": 1.0
+    "accuracy": 0.6933333333333334,
+    "macro_f1": 0.6768747718145308
   }
 }
