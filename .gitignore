@@ -63,3 +63,4 @@ htmlcov/
 
 # MyPy
 .mypy_cache/
+checkpoints/*.pth
