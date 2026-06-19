@@ -17,7 +17,7 @@ from pathlib import Path
 
 OUTPUT_DIR = Path("data/processed")
 SPLITS = {"train": 0.80, "val": 0.10, "test": 0.10}
-SAMPLES_PER_CLASS = {"train": 200, "val": 30, "test": 30}
+SAMPLES_PER_CLASS = {"train": 400, "val": 50, "test": 50}
 
 CLASS_MAP = {
     "GALAXY": "spiral_galaxy",
