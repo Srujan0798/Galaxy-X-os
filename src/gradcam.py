@@ -276,7 +276,8 @@ def main():
         from utils import load_config
         config = load_config()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    from utils import get_device
+    device = get_device()
     model = load_model_for_gradcam(config.get("eval_checkpoint", "checkpoints/best_model.pth"), device)
     test_dataset = AstroDataset(config["data"]["processed_dir"], "test", config["data"]["image_size"])
 

@@ -1,4 +1,6 @@
 # SCALE x ODYSSEY -- Central Configuration
+seed: 42
+
 data:
   raw_dir: "data/raw"
   processed_dir: "data/processed"
@@ -16,6 +18,7 @@ training:
   lr: 3.0e-4
   weight_decay: 1.0e-4
   label_smoothing: 0.1
+  batch_size: 32
   patience: 12
   mixed_precision: true
   freeze_backbone_epochs: 3

@@ -18,6 +18,7 @@ import numpy as np
 from PIL import Image
 
 from inference import ModelManager, InferenceResult
+from utils import get_device
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ def generate_caption(image_path: str, max_length: int = 50) -> Dict[str, str]:
         return {"caption": "Captioning unavailable (install transformers library)", "confidence": "N/A"}
 
     try:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = get_device()  # CUDA > Apple MPS > CPU
 
         # Load BLIP model and processor (auto-downloads on first use)
         processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")

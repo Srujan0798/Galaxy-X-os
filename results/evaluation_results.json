@@ -1,13 +1,20 @@
 {
   "standard": {
-    "accuracy": 0.696,
-    "macro_f1": 0.6837340876944837,
+    "accuracy": 0.724,
+    "macro_precision": 0.7217797888386123,
+    "macro_recall": 0.724,
+    "macro_f1": 0.7204546971551088,
     "per_class_f1": {
-      "Spiral Galaxy": 0.42857142857142855,
+      "Spiral Galaxy": 0.449438202247191,
       "Elliptical Galaxy": 1.0,
-      "Nebula": 0.9900990099009901,
-      "Star Cluster": 0.4,
-      "Planetary Object": 0.6
+      "Nebula": 1.0,
+      "Star Cluster": 0.5346534653465347,
+      "Planetary Object": 0.6181818181818182
     }
-  }
+  },
+  "tta": {
+    "accuracy": 0.744,
+    "macro_f1": 0.7425698516453588
+  },
+  "classification_report": "                   precision    recall  f1-score   support\n\n    Spiral Galaxy     0.5128    0.4000    0.4494        50\nElliptical Galaxy     1.0000    1.0000    1.0000        50\n           Nebula     1.0000    1.0000    1.0000        50\n     Star Cluster     0.5294    0.5400    0.5347        50\n Planetary Object     0.5667    0.6800    0.6182        50\n\n         accuracy                         0.7240       250\n        macro avg     0.7218    0.7240    0.7205       250\n     weighted avg     0.7218    0.7240    0.7205       250\n"
 }

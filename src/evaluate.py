@@ -24,7 +24,7 @@ import seaborn as sns
 
 from dataset import AstroDataset, CLASS_NAMES_DISPLAY, get_val_transforms
 from model import AstroClassifier
-from utils import load_config, load_checkpoint, compute_metrics
+from utils import load_config, load_checkpoint, compute_metrics, get_device
 from PIL import Image
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -187,7 +187,7 @@ def plot_confidence_distribution(probs, save_path):
 
 def main():
     config = load_config()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     results_dir = Path(config["paths"]["results"])
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -233,10 +233,17 @@ def main():
                                 config["data"].get("num_workers", 4))
 
     # Save
+    from sklearn.metrics import precision_score, recall_score
+    macro_precision = precision_score(results["labels"], results["predictions"], average="macro", zero_division=0)
+    macro_recall = recall_score(results["labels"], results["predictions"], average="macro", zero_division=0)
     output = {
-        "standard": {"accuracy": float(results["accuracy"]), "macro_f1": float(results["macro_f1"]),
+        "standard": {"accuracy": float(results["accuracy"]),
+                     "macro_precision": float(macro_precision),
+                     "macro_recall": float(macro_recall),
+                     "macro_f1": float(results["macro_f1"]),
                      "per_class_f1": {k: float(v) for k, v in results["per_class_f1"].items()}},
         "tta": {"accuracy": float(tta_results["accuracy"]), "macro_f1": float(tta_results["macro_f1"])},
+        "classification_report": results["classification_report"],
     }
     with open(results_dir / "evaluation_results.json", "w") as f:
         json.dump(output, f, indent=2)

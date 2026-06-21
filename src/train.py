@@ -20,16 +20,16 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from dataset import get_loaders
 from model import AstroClassifier
-from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics
+from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device
 
 
-def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp):
+def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp, scheduler=None):
     model.train()
     total_loss, correct, total = 0.0, 0, 0
     all_preds, all_labels = [], []
@@ -38,8 +38,8 @@ def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad(set_to_none=True)
 
-        if use_amp:
-            with autocast():
+        if use_amp and scaler is not None and device.type in ("cuda", "mps"):
+            with autocast(device_type=device.type):
                 outputs = model(images)
                 loss = criterion(outputs, labels)
             scaler.scale(loss).backward()
@@ -53,6 +53,9 @@ def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
+
+        if scheduler is not None:
+            scheduler.step()
 
         total_loss += loss.item() * images.size(0)
         preds = outputs.argmax(dim=1)
@@ -126,7 +129,7 @@ def main():
     checkpoint_dir = Path(config["paths"]["checkpoints"])
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     logger = setup_logger(config["paths"]["logs"], f"{backbone}_{int(time.time())}")
 
     logger.info("=" * 70)
@@ -161,7 +164,7 @@ def main():
         anneal_strategy="cos", div_factor=25.0, final_div_factor=1e4,
     )
 
-    scaler = GradScaler() if use_amp else None
+    scaler = GradScaler(device.type) if (use_amp and device.type in ("cuda", "mps")) else None
     tb_writer = SummaryWriter(log_dir=config["paths"]["logs"])
 
     best_val_acc, patience_ctr = 0.0, 0
@@ -194,9 +197,8 @@ def main():
             logger.info(f"[Epoch {epoch+1}] Phase 2: Full fine-tuning | Backbone LR = {lr/10:.2e}, Head LR = {lr:.2e}")
 
         # Train & validate
-        train_m = train_one_epoch(model, train_loader, optimizer, criterion, scaler, device, use_amp)
+        train_m = train_one_epoch(model, train_loader, optimizer, criterion, scaler, device, use_amp, scheduler)
         val_m = validate(model, val_loader, criterion, device)
-        scheduler.step()
 
         epoch_time = time.time() - epoch_start
         lr_now = optimizer.param_groups[0]["lr"]

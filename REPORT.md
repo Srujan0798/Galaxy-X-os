@@ -22,13 +22,14 @@
 
 ## Final Test Metrics
 
-| Metric | Value |
-|---|---|
-| **Test Accuracy (Standard)** | **72.4%** |
-| **Test Accuracy (TTA, 6× aug)** | **74.4%** |
-| **Macro F1 (Standard)** | **0.720** |
-| **Macro F1 (TTA)** | **0.742** |
-| Best Val Accuracy | 95.0% (epoch 5, CPU run) |
+Evaluated on the held-out test set (250 images, 50 per class). Macro-averaged.
+
+| Metric | Standard | + TTA (6× aug) |
+|---|---|---|
+| **Accuracy** | **72.4%** | **74.4%** |
+| **Precision (macro)** | **0.722** | — |
+| **Recall (macro)** | **0.724** | — |
+| **F1 (macro)** | **0.720** | **0.742** |
 
 **Per-class F1 (Standard):**
 
@@ -68,4 +69,6 @@ streamlit run app/app.py          # web demo
 
 ## Training Script
 
-Main entry point: [`src/train.py`](src/train.py). Config: [`config/config.yaml`](config/config.yaml). Best checkpoint: `checkpoints/epoch_005.pth` (95% val acc, CPU run) / `checkpoints/best_model.pth` (72.4% test acc, MPS run).
+Main entry point: [`src/train.py`](src/train.py). Config: [`config/config.yaml`](config/config.yaml). Trained checkpoint: `checkpoints/best_model.pth`.
+
+> **Hardware note:** trained on an 8 GB MacBook Air (Apple MPS, no CUDA). Full backbone fine-tuning is memory-bound (needs >12 GB), so the reported result uses transfer learning with the backbone largely frozen. On a CUDA GPU the same pipeline supports full fine-tuning and faster (tens-of-ms) inference.

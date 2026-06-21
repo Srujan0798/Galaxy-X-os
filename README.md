@@ -2,8 +2,8 @@
 
 **Sequence-Based Classification of Astronomical Objects Using Deep Learning**
 
-> High-accuracy deep learning model for classifying raw astronomical images into 5 celestial categories.
-> **TechOIITGN Hackathon Submission** | **69.6% test accuracy (0.68 macro F1)** | **<15ms inference** | **Full Grad-CAM + Web Demo**
+> Deep learning model for classifying raw astronomical images into 5 celestial categories.
+> **TechOIITGN Hackathon Submission** | **72.4% test accuracy (74.4% with TTA, ~0.72 macro F1)** | **Grad-CAM explainability + Web Demo**
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 69.6% test accuracy / 0.68 macro F1 on real SDSS DR17 data, <15ms inference per image on GPU, professional Grad-CAM visualizations, interactive web application |
+| **Key Results** | 72.4% test accuracy (74.4% with TTA) / ~0.72 macro F1 on real SDSS DR17 + merged Kaggle galaxy data, professional Grad-CAM visualizations, interactive web application |
 
 ### 5-Class Taxonomy
 
@@ -105,13 +105,11 @@ scale_odyssey/
 
 | Component | Weight | Score | Evidence |
 |-----------|--------|-------|----------|
-| **Classification Performance** | 40% | — | 69.6% accuracy, 0.68 macro F1, confusion matrix, per-class F1, classification report |
-| **Model Efficiency** | 15% | 10/10 | 12M parameters, mixed precision (torch.amp), <15ms inference, <5s total |
-| **Explainability & Visualization** | 15% | 10/10 | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
-| **Innovation / Bonus Features** | 15% | 10/10 | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |
-| **Documentation & Presentation** | 15% | 10/10 | Full README, modular code, 3 Jupyter notebooks, reproducible configs, demo video |
-
-**Total Expected: 98-100%**
+| **Classification Performance** | 40% | — | 72.4% accuracy (74.4% with TTA), ~0.72 macro F1, confusion matrix, per-class F1, classification report |
+| **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), few-hundred-ms inference per image on Apple MPS |
+| **Explainability & Visualization** | 15% | — | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
+| **Innovation / Bonus Features** | 15% | — | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |
+| **Documentation & Presentation** | 15% | — | Full README, modular code, 3 Jupyter notebooks, reproducible configs, demo video |
 
 ---
 
@@ -121,8 +119,8 @@ scale_odyssey/
 python src/download_datasets.py
 ```
 
-- Multi-source Kaggle dataset merging (Galaxy Zoo, DeepSky, Planetary)
-- 80/10/10 stratified train/val/test splits
+- Multi-source data: SDSS DR17 + merged Kaggle galaxy datasets
+- Balanced splits: 2000 train / 250 val / 250 test (400 per class train, 50 per class test)
 - Class imbalance handling (oversampling + weighted loss)
 - Quality filtering (corrupted image removal)
 - 8 astronomy-specific augmentation transforms (cosmic ray simulation, vignetting, Poisson noise)
@@ -150,7 +148,7 @@ python src/train.py
 
 ### Training Features
 
-- **Backbone**: EfficientNet-B3 (12M parameters, pretrained on ImageNet)
+- **Backbone**: EfficientNet-B3 (~11.6M parameters, pretrained on ImageNet)
 - **Optimizer**: AdamW with weight decay
 - **Scheduler**: OneCycleLR with 30% warmup
 - **Loss**: Weighted CrossEntropyLoss + label smoothing (0.1)
@@ -165,7 +163,7 @@ python src/train.py
 | `model.backbone` | `efficientnet_b3` | Options: `efficientnet_b3`, `efficientnet_b4`, `resnet50` |
 | `training.num_epochs` | 50 | Increase to 100 for final run |
 | `training.lr` | 3e-4 | OneCycleLR max learning rate |
-| `training.batch_size` | 32 | Reduce to 16 if OOM |
+| `training.batch_size` | 32 | Reduce to 16 if OOM (memory-bound on 8GB; full backbone fine-tune needs >12GB) |
 | `training.patience` | 12 | Early stopping patience |
 | `training.mixed_precision` | true | Disable if instability |
 | `training.freeze_backbone_epochs` | 3 | Progressive unfreezing duration |
@@ -202,7 +200,7 @@ python src/inference.py path/to/images/ --batch-size 16
 - Single + batch prediction with **automatic mixed precision**
 - Returns: class name, confidence, full probability distribution, inference time
 
-**Expected**: <15ms per image on GPU
+**Measured**: roughly a few hundred ms per image on Apple MPS (8GB MacBook Air). Faster (~tens of ms) expected on a CUDA GPU.
 
 ### Interactive Web Demo
 
@@ -280,7 +278,7 @@ jupyter lab notebooks/
 | Component | Choice |
 |-----------|--------|
 | Framework | PyTorch 2.4+ |
-| Backbone | EfficientNet-B3 (12M params) via timm |
+| Backbone | EfficientNet-B3 (~11.6M params) via timm |
 | Augmentation | Albumentations + 8 custom astro transforms |
 | Scheduler | OneCycleLR |
 | Optimizer | AdamW |
@@ -315,7 +313,7 @@ All training configurations are centralized in `configs/config.yaml`.
 1. **Computer vision pipelines** for scientific imagery
 2. **Transfer learning** with progressive unfreezing
 3. **Explainable AI** (Grad-CAM visualizations)
-4. **Production-ready deployment** (Streamlit web app)
+4. **Interactive deployment** (Streamlit web app)
 5. **Real-world domain-specific ML** (astronomical imaging challenges)
 
 ---

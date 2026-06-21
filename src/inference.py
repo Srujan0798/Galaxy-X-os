@@ -22,6 +22,7 @@ from PIL import Image
 
 from model import AstroClassifier
 from dataset import CLASS_NAMES_DISPLAY, get_val_transforms
+from utils import get_device
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ class ModelManager:
     def __init__(self, checkpoint_path: str = "checkpoints/best_model.pth",
                  device: Optional[str] = None):
         self.checkpoint_path = checkpoint_path
-        self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
+        self.device = torch.device(device) if device else get_device()
         self.model: Optional[nn.Module] = None
         self.image_size: int = 224
         self._transform = get_val_transforms(self.image_size)
@@ -112,8 +113,8 @@ class ModelManager:
         input_tensor = self._preprocess(image).to(self.device, non_blocking=True)
         t0 = time.perf_counter()
 
-        if self.device.type == "cuda":
-            with torch.autocast(device_type="cuda", dtype=torch.float16):
+        if self.device.type in ("cuda", "mps"):
+            with torch.autocast(device_type=self.device.type, dtype=torch.float16):
                 logits = self.model(input_tensor)
         else:
             logits = self.model(input_tensor)
@@ -146,8 +147,8 @@ class ModelManager:
         t0 = time.perf_counter()
         for i in range(0, len(images), batch_size):
             batch = all_tensors[i:i + batch_size].to(self.device, non_blocking=True)
-            if self.device.type == "cuda":
-                with torch.autocast(device_type="cuda", dtype=torch.float16):
+            if self.device.type in ("cuda", "mps"):
+                with torch.autocast(device_type=self.device.type, dtype=torch.float16):
                     logits = self.model(batch)
             else:
                 logits = self.model(batch)
@@ -180,7 +181,7 @@ def predict_image(image: Union[str, Path, np.ndarray],
     return ModelManager(checkpoint_path=checkpoint_path, device=device).predict(image)
 
 
-def predict_batch(images: List[Union[str, Path, np.np]],
+def predict_batch(images: List[Union[str, Path, np.ndarray]],
                   checkpoint_path: str = "checkpoints/best_model.pth",
                   device: Optional[str] = None, batch_size: int = 16) -> List[InferenceResult]:
     return ModelManager(checkpoint_path=checkpoint_path, device=device).predict_batch(images, batch_size)
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SCALE x ODYSSEY Inference")
     parser.add_argument("image", type=str, help="Path to image or directory")
     parser.add_argument("--checkpoint", default="checkpoints/best_model.pth")
-    parser.add_argument("--device", default=None, choices=["cuda", "cpu"])
+    parser.add_argument("--device", default=None, choices=["cuda", "mps", "cpu"])
     parser.add_argument("--batch-size", type=int, default=16)
     args = parser.parse_args()
 

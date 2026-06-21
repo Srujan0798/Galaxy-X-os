@@ -1,4 +1,4 @@
-<html><head><meta charset='utf-8'><style>body{font-family:-apple-system,Helvetica,Arial;max-width:800px;margin:30px auto;line-height:1.45;color:#111}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:5px 9px;text-align:left}h1{font-size:22px}h2{font-size:16px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-top:22px}code{background:#f4f4f4;padding:1px 4px}pre{background:#f4f4f4;padding:10px;overflow:auto}</style></head><body><h1>Galaxy-X-os — One-Page Technical Report</h1>
+<html><head><meta charset='utf-8'><style>body{font-family:-apple-system,Helvetica,Arial;max-width:800px;margin:30px auto;line-height:1.45;color:#111}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:5px 9px;text-align:left}h1{font-size:22px}h2{font-size:16px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-top:22px}code{background:#f4f4f4;padding:1px 4px}pre{background:#f4f4f4;padding:10px;overflow:auto}blockquote{border-left:3px solid #ccc;margin-left:0;padding-left:12px;color:#444}</style></head><body><h1>Galaxy-X-os — One-Page Technical Report</h1>
 <p><strong>SCALE x ODYSSEY</strong> | Deep-learning classification of raw astronomical images into 5 celestial categories.
 <strong>GitHub:</strong> https://github.com/Srujan0798/Galaxy-X-os</p>
 <hr />
@@ -18,33 +18,35 @@
 <li><strong>Explainability:</strong> Grad-CAM heatmaps over predictions.</li>
 </ul>
 <h2>Final Test Metrics</h2>
+<p>Evaluated on the held-out test set (250 images, 50 per class). Macro-averaged.</p>
 <table>
 <thead>
 <tr>
 <th>Metric</th>
-<th>Value</th>
+<th>Standard</th>
+<th>+ TTA (6× aug)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Test Accuracy (Standard)</strong></td>
+<td><strong>Accuracy</strong></td>
 <td><strong>72.4%</strong></td>
-</tr>
-<tr>
-<td><strong>Test Accuracy (TTA, 6× aug)</strong></td>
 <td><strong>74.4%</strong></td>
 </tr>
 <tr>
-<td><strong>Macro F1 (Standard)</strong></td>
+<td><strong>Precision (macro)</strong></td>
+<td><strong>0.722</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Recall (macro)</strong></td>
+<td><strong>0.724</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>F1 (macro)</strong></td>
 <td><strong>0.720</strong></td>
-</tr>
-<tr>
-<td><strong>Macro F1 (TTA)</strong></td>
 <td><strong>0.742</strong></td>
-</tr>
-<tr>
-<td>Best Val Accuracy</td>
-<td>95.0% (epoch 5, CPU run)</td>
 </tr>
 </tbody>
 </table>
@@ -89,15 +91,18 @@
 <li>Streamlit demo runs in real time.</li>
 </ul>
 <h2>Setup Instructions</h2>
-<p>```bash
-conda create -n scale_odyssey python=3.10 -y
+<pre><code class="language-bash">conda create -n scale_odyssey python=3.10 -y
 conda activate scale_odyssey
-pip install -r requirements.txt</p>
-<p>python src/download_datasets.py   # prepare data
+pip install -r requirements.txt
+
+python src/download_datasets.py   # prepare data
 python src/train.py               # train
 python src/evaluate.py            # evaluate (standard + TTA)
 python src/gradcam.py            # Grad-CAM report
 streamlit run app/app.py          # web demo
-```</p>
+</code></pre>
 <h2>Training Script</h2>
-<p>Main entry point: <a href="src/train.py"><code>src/train.py</code></a>. Config: <a href="config/config.yaml"><code>config/config.yaml</code></a>. Best checkpoint: <code>checkpoints/epoch_005.pth</code> (95% val acc, CPU run) / <code>checkpoints/best_model.pth</code> (72.4% test acc, MPS run).</p></body></html>
+<p>Main entry point: <a href="src/train.py"><code>src/train.py</code></a>. Config: <a href="config/config.yaml"><code>config/config.yaml</code></a>. Trained checkpoint: <code>checkpoints/best_model.pth</code>.</p>
+<blockquote>
+<p><strong>Hardware note:</strong> trained on an 8 GB MacBook Air (Apple MPS, no CUDA). Full backbone fine-tuning is memory-bound (needs &gt;12 GB), so the reported result uses transfer learning with the backbone largely frozen. On a CUDA GPU the same pipeline supports full fine-tuning and faster (tens-of-ms) inference.</p>
+</blockquote></body></html>
