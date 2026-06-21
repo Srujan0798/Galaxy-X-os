@@ -64,3 +64,11 @@ htmlcov/
 # MyPy
 .mypy_cache/
 checkpoints/*.pth
+
+# Local archive of orchestration scaffolding (not part of deliverable)
+attic/
+
+# Datasets (reproducible via src/download_datasets.py + src/generate_splits.py)
+data/processed/
+data/processed_leaky_backup/
+data/raw/

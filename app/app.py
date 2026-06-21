@@ -56,6 +56,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from inference import ModelManager, InferenceResult
 from gradcam import explain_image
 from dataset import CLASS_NAMES_DISPLAY
+from utils import get_device
 
 
 # ---------------------------------------------------------------------------
@@ -64,7 +65,7 @@ from dataset import CLASS_NAMES_DISPLAY
 
 @st.cache_resource(show_spinner="Loading model...")
 def load_model(checkpoint_path: str = "checkpoints/best_model.pth"):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = str(get_device())  # CUDA > MPS > CPU
     return ModelManager(checkpoint_path=checkpoint_path, device=device)
 
 
@@ -83,10 +84,12 @@ def render_sidebar():
     with st.sidebar:
         st.title("⚙️ Settings")
         st.subheader("Model")
-        device = "CUDA" if torch.cuda.is_available() else "CPU"
-        icon = "🟢" if torch.cuda.is_available() else "🟡"
+        device_type = get_device().type  # cuda | mps | cpu
+        device_labels = {"cuda": "CUDA", "mps": "Apple MPS", "cpu": "CPU"}
+        device = device_labels.get(device_type, device_type.upper())
+        icon = "🟢" if device_type in ("cuda", "mps") else "🟡"
         st.markdown(f"{icon} **Device:** {device}")
-        if torch.cuda.is_available():
+        if device_type == "cuda":
             st.markdown(f"📟 **GPU:** {torch.cuda.get_device_name(0)}")
         st.markdown("🧠 **Backbone:** EfficientNet-B3")
         st.markdown("📊 **Classes:** 5")

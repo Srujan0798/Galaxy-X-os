@@ -32,12 +32,28 @@ def set_seed(seed: int = 42):
     torch.backends.cudnn.benchmark = False
 
 
+def get_device() -> torch.device:
+    """Pick the best available accelerator: CUDA > Apple MPS > CPU."""
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 
-def load_config(config_path: str = "config/config.yaml") -> Dict:
-    """Load YAML configuration."""
+def load_config(config_path: str = None) -> Dict:
+    """Load YAML configuration (checks configs/ then config/)."""
+    if config_path is None:
+        for p in ["configs/config.yaml", "config/config.yaml"]:
+            if os.path.exists(p):
+                config_path = p
+                break
+        if config_path is None:
+            raise FileNotFoundError("No config.yaml found in configs/ or config/")
     with open(config_path) as f:
         return yaml.safe_load(f)
 

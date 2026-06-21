@@ -10,7 +10,7 @@
 - **SDSS DR17** (Sloan Digital Sky Survey, Data Release 17) — real astronomical imaging used for the final trained model.
 - Merged Kaggle galaxy-morphology datasets (Galaxy Zoo / DeepSky / Planetary imagery) for class balancing.
 - **5 classes:** Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object.
-- **Split:** 80 / 10 / 10 (train / val / test). 2000 training images (400/class), 250 val, 250 test.
+- **Split:** stratified **disjoint** 80 / 10 / 10 — **1600 train / 200 val / 200 test**. Verified by MD5 hash that no image appears in more than one split (zero train/test leakage).
 
 ## Model Architecture
 
@@ -22,13 +22,14 @@
 
 ## Final Test Metrics
 
-| Metric | Value |
-|---|---|
-| **Test Accuracy (Standard)** | **72.4%** |
-| **Test Accuracy (TTA, 6× aug)** | **74.4%** |
-| **Macro F1 (Standard)** | **0.720** |
-| **Macro F1 (TTA)** | **0.742** |
-| Best Val Accuracy | 95.0% (epoch 5, CPU run) |
+Evaluated on the held-out **disjoint** test set (200 images, 40 per class — none seen in training). Macro-averaged.
+
+| Metric | Standard | + TTA (6× aug) |
+|---|---|---|
+| **Accuracy** | **72.0%** | **74.5%** |
+| **Precision (macro)** | **0.716** | — |
+| **Recall (macro)** | **0.720** | — |
+| **F1 (macro)** | **0.711** | **0.741** |
 
 **Per-class F1 (Standard):**
 
@@ -36,11 +37,11 @@
 |---|---|
 | Elliptical Galaxy | 1.000 |
 | Nebula | 1.000 |
-| Planetary Object | 0.618 |
-| Star Cluster | 0.535 |
-| Spiral Galaxy | 0.449 |
+| Planetary Object | 0.660 |
+| Star Cluster | 0.400 |
+| Spiral Galaxy | 0.494 |
 
-*Strongest on Elliptical/Nebula; Spiral vs Star Cluster confusion drives the lower macro score (visually similar diffuse structures). TTA adds +2% accuracy across the board.*
+*Strongest on Elliptical/Nebula (near-perfect); Spiral vs Star Cluster confusion drives the lower macro score (visually similar diffuse structures). TTA adds ~+2.5% accuracy.*
 
 ## Confusion Matrix
 
@@ -68,4 +69,8 @@ streamlit run app/app.py          # web demo
 
 ## Training Script
 
-Main entry point: [`src/train.py`](src/train.py). Config: [`config/config.yaml`](config/config.yaml). Best checkpoint: `checkpoints/epoch_005.pth` (95% val acc, CPU run) / `checkpoints/best_model.pth` (72.4% test acc, MPS run).
+- **Full pipeline:** [`src/train.py`](src/train.py) — progressive unfreezing + OneCycleLR (for CUDA GPUs).
+- **Memory-safe trainer:** [`src/train_head.py`](src/train_head.py) — frozen backbone + head, used for the reported result on 8 GB hardware.
+- **Disjoint split:** [`src/generate_splits.py`](src/generate_splits.py). Config: [`configs/config.yaml`](configs/config.yaml). Checkpoint: `checkpoints/best_model.pth`.
+
+> **Hardware note:** trained on an 8 GB MacBook Air (Apple MPS, no CUDA). Full backbone fine-tuning is memory-bound (needs >12 GB and swaps to disk), so the reported result uses transfer learning with the backbone frozen and the classifier head trained. On a CUDA GPU the same `src/train.py` pipeline supports full fine-tuning and faster (tens-of-ms) inference.
