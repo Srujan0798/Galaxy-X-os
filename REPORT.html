@@ -7,14 +7,14 @@
 <li><strong>SDSS DR17</strong> (Sloan Digital Sky Survey, Data Release 17) — real astronomical imaging used for the final trained model.</li>
 <li>Merged Kaggle galaxy-morphology datasets (Galaxy Zoo / DeepSky / Planetary imagery) for class balancing.</li>
 <li><strong>5 classes:</strong> Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object.</li>
-<li><strong>Split:</strong> 80 / 10 / 10 (train / val / test). ~2000 training images.</li>
+<li><strong>Split:</strong> 80 / 10 / 10 (train / val / test). 2000 training images (400/class), 250 val, 250 test.</li>
 </ul>
 <h2>Model Architecture</h2>
 <ul>
-<li><strong>Backbone:</strong> EfficientNet-B3 (ImageNet pretrained, transfer learning) — ~12M parameters.</li>
+<li><strong>Backbone:</strong> EfficientNet-B3 (ImageNet pretrained, transfer learning) — ~11.6M parameters.</li>
 <li><strong>Head:</strong> Replaced classifier → 5-class output.</li>
-<li><strong>Training strategy:</strong> Progressive unfreezing (backbone frozen first 3 epochs), mixed-precision (<code>torch.amp</code>), Adam (lr <code>3e-4</code>), batch size 32.</li>
-<li><strong>Augmentations:</strong> Albumentations astro-specific pipeline (cosmic-ray simulation, vignetting, Poisson noise, flips/rotations).</li>
+<li><strong>Training strategy:</strong> Progressive unfreezing (backbone frozen first 3 epochs), mixed-precision (<code>torch.amp</code>), AdamW (lr <code>3e-4</code>), batch size 32, OneCycleLR scheduler.</li>
+<li><strong>Augmentations:</strong> Albumentations astro-specific pipeline (cosmic-ray simulation, vignetting, Poisson noise, flips/rotations, label smoothing 0.1).</li>
 <li><strong>Explainability:</strong> Grad-CAM heatmaps over predictions.</li>
 </ul>
 <h2>Final Test Metrics</h2>
@@ -27,20 +27,28 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Test Accuracy</strong></td>
-<td><strong>69.6%</strong></td>
+<td><strong>Test Accuracy (Standard)</strong></td>
+<td><strong>72.4%</strong></td>
 </tr>
 <tr>
-<td><strong>Macro F1</strong></td>
-<td><strong>0.684</strong></td>
+<td><strong>Test Accuracy (TTA, 6× aug)</strong></td>
+<td><strong>74.4%</strong></td>
+</tr>
+<tr>
+<td><strong>Macro F1 (Standard)</strong></td>
+<td><strong>0.720</strong></td>
+</tr>
+<tr>
+<td><strong>Macro F1 (TTA)</strong></td>
+<td><strong>0.742</strong></td>
 </tr>
 <tr>
 <td>Best Val Accuracy</td>
-<td>75.0%</td>
+<td>95.0% (epoch 5, CPU run)</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Per-class F1:</strong></p>
+<p><strong>Per-class F1 (Standard):</strong></p>
 <table>
 <thead>
 <tr>
@@ -51,33 +59,34 @@
 <tbody>
 <tr>
 <td>Elliptical Galaxy</td>
-<td>1.00</td>
+<td>1.000</td>
 </tr>
 <tr>
 <td>Nebula</td>
-<td>0.99</td>
+<td>1.000</td>
 </tr>
 <tr>
 <td>Planetary Object</td>
-<td>0.60</td>
-</tr>
-<tr>
-<td>Spiral Galaxy</td>
-<td>0.43</td>
+<td>0.618</td>
 </tr>
 <tr>
 <td>Star Cluster</td>
-<td>0.40</td>
+<td>0.535</td>
+</tr>
+<tr>
+<td>Spiral Galaxy</td>
+<td>0.449</td>
 </tr>
 </tbody>
 </table>
-<p><em>Strongest on Elliptical/Nebula; Spiral vs Star Cluster confusion drives the lower macro score (visually similar diffuse structures, limited training samples).</em></p>
+<p><em>Strongest on Elliptical/Nebula; Spiral vs Star Cluster confusion drives the lower macro score (visually similar diffuse structures). TTA adds +2% accuracy across the board.</em></p>
 <h2>Confusion Matrix</h2>
-<p>See <a href="results/confusion_matrix.png"><code>results/confusion_matrix.png</code></a>. Additional plots: <code>results/per_class_metrics.png</code>, <code>results/training_curves.png</code>.</p>
+<p>See <a href="results/confusion_matrix.png"><code>results/confusion_matrix.png</code></a>. Additional plots: <code>results/per_class_metrics.png</code>, <code>results/training_curves.png</code>, <code>results/confidence_distribution.png</code>.</p>
 <h2>Inference Time</h2>
 <ul>
-<li><strong>&lt; 15 ms per image on GPU</strong> (single forward pass, EfficientNet-B3, mixed precision).</li>
-<li>CPU inference runs in real time for the Streamlit demo.</li>
+<li><strong>~410 ms per image on Apple MPS</strong> (EfficientNet-B3, mixed precision, batch=1, after warmup).</li>
+<li><strong>Target &lt;15 ms on CUDA GPU</strong> — code supports <code>torch.autocast("cuda")</code> for GPU deployment.</li>
+<li>Streamlit demo runs in real time.</li>
 </ul>
 <h2>Setup Instructions</h2>
 <p>```bash
@@ -91,4 +100,4 @@ python src/gradcam.py            # Grad-CAM report
 streamlit run app/app.py          # web demo
 ```</p>
 <h2>Training Script</h2>
-<p>Main entry point: <a href="src/train.py"><code>src/train.py</code></a>. Config: <a href="config/config.yaml"><code>config/config.yaml</code></a>. Model checkpoints saved to <code>checkpoints/best_model.pth</code>.</p></body></html>
+<p>Main entry point: <a href="src/train.py"><code>src/train.py</code></a>. Config: <a href="config/config.yaml"><code>config/config.yaml</code></a>. Best checkpoint: <code>checkpoints/epoch_005.pth</code> (95% val acc, CPU run) / <code>checkpoints/best_model.pth</code> (72.4% test acc, MPS run).</p></body></html>
