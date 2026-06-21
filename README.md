@@ -3,7 +3,7 @@
 **Sequence-Based Classification of Astronomical Objects Using Deep Learning**
 
 > Deep learning model for classifying raw astronomical images into 5 celestial categories.
-> **TechOIITGN Hackathon Submission** | **72.4% test accuracy (74.4% with TTA, ~0.72 macro F1)** | **Grad-CAM explainability + Web Demo**
+> **TechOIITGN Hackathon Submission** | **72.0% test accuracy (74.5% with TTA, 0.71 macro F1)** | **Grad-CAM explainability + Web Demo**
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 72.4% test accuracy (74.4% with TTA) / ~0.72 macro F1 on real SDSS DR17 + merged Kaggle galaxy data, professional Grad-CAM visualizations, interactive web application |
+| **Key Results** | 72.0% test accuracy (74.5% with TTA) / 0.71 macro F1 on real SDSS DR17 + merged Kaggle galaxy data (verified disjoint split, no leakage), professional Grad-CAM visualizations, interactive web application |
 
 ### 5-Class Taxonomy
 
@@ -62,41 +62,37 @@ streamlit run app/app.py
 ## Repository Structure
 
 ```
-scale_odyssey/
+Galaxy-X-os/
+├── README.md                        # This file — overview + how to run
+├── REPORT.md / REPORT.pdf           # One-page submission report (metrics, etc.)
+├── PROBLEM_STATEMENT.md             # Official problem statement (transcribed)
+├── BONUS_FEATURES.md                # Captioning + anomaly detection write-up
+├── SUBMISSION.md                    # Submission checklist (criteria → files)
+├── Makefile  requirements.txt  Dockerfile  LICENSE
 ├── configs/
 │   └── config.yaml                  # Central configuration
 ├── src/
-│   ├── __init__.py
 │   ├── dataset.py                   # PyTorch Dataset + Albumentations pipeline
 │   ├── model.py                     # EfficientNet-B3 + custom head + Grad-CAM hooks
-│   ├── utils.py                     # Helper functions (seed, config, metrics, logging)
-│   ├── train.py                     # Progressive unfreezing + OneCycleLR + mixed precision
-│   ├── evaluate.py                  # Metrics + batched TTA + confusion matrix
+│   ├── utils.py                     # Helpers (device, seed, config, metrics, logging)
+│   ├── generate_splits.py           # Stratified DISJOINT train/val/test split
+│   ├── train.py                     # Full pipeline: progressive unfreezing + OneCycleLR
+│   ├── train_head.py                # Memory-safe head-only trainer (8 GB machines)
+│   ├── evaluate.py                  # Metrics (Acc/Prec/Rec/F1) + TTA + confusion matrix
 │   ├── gradcam.py                   # explain_image() + 15-sample 3-panel visualization
-│   ├── inference.py                 # Fast single/batch inference + ModelManager singleton
-│   └── bonus.py                     # Image captioning (BLIP) + Anomaly detection
+│   ├── inference.py                 # Fast single/batch inference + ModelManager
+│   └── bonus.py                     # Image captioning (BLIP) + anomaly detection
 ├── app/
 │   └── app.py                       # Streamlit interactive web demo
-├── notebooks/
-│   ├── 01_EDA.ipynb                 # Exploratory data analysis
-│   ├── 02_Training.ipynb            # Interactive training with live plots
-│   └── 03_Evaluation.ipynb          # Evaluation + Grad-CAM visualization
+├── notebooks/                       # 01_EDA, 02_Training, 03_Evaluation
 ├── data/
-│   ├── raw/                         # Downloaded Kaggle datasets
-│   └── processed/                   # Clean 5-class dataset (80/10/10 splits)
-├── checkpoints/
-│   └── best_model.pth               # Trained model weights
-├── results/
-│   ├── logs/                        # TensorBoard logs
-│   ├── gradcam/                     # 15 Grad-CAM 3-panel visualizations + summary grid
-│   ├── confusion_matrix.png
-│   ├── per_class_metrics.png
-│   ├── confidence_distribution.png
-│   └── evaluation_results.json
-├── README.md
-├── requirements.txt
-├── LICENSE (MIT)
-└── .gitignore
+│   ├── raw/                         # Source datasets (SDSS DR17 + Kaggle)
+│   └── processed/                   # Disjoint 5-class split: 1600 train / 200 val / 200 test
+├── checkpoints/                     # Trained weights (best_model.pth, gitignored)
+├── results/                         # confusion_matrix.png, gradcam/, evaluation_results.json
+├── docs/                            # ADRs, runbooks, presentation/
+├── tests/                           # Test suite
+└── attic/                           # Archived orchestration scaffolding (not part of deliverable)
 ```
 
 ---
@@ -105,7 +101,7 @@ scale_odyssey/
 
 | Component | Weight | Score | Evidence |
 |-----------|--------|-------|----------|
-| **Classification Performance** | 40% | — | 72.4% accuracy (74.4% with TTA), ~0.72 macro F1, confusion matrix, per-class F1, classification report |
+| **Classification Performance** | 40% | — | 72.0% accuracy (74.5% with TTA), 0.71 macro F1, confusion matrix, per-class F1, classification report |
 | **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), few-hundred-ms inference per image on Apple MPS |
 | **Explainability & Visualization** | 15% | — | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
 | **Innovation / Bonus Features** | 15% | — | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |
@@ -120,7 +116,7 @@ python src/download_datasets.py
 ```
 
 - Multi-source data: SDSS DR17 + merged Kaggle galaxy datasets
-- Balanced splits: 2000 train / 250 val / 250 test (400 per class train, 50 per class test)
+- Balanced **disjoint** splits: 1600 train / 200 val / 200 test (verified by MD5 — no image in >1 split)
 - Class imbalance handling (oversampling + weighted loss)
 - Quality filtering (corrupted image removal)
 - 8 astronomy-specific augmentation transforms (cosmic ray simulation, vignetting, Poisson noise)

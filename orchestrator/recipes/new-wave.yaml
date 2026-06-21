@@ -1,6 +1,0 @@
-name: new-wave
-steps:
-  - read: [PRD.md, ARCHITECTURE.md, EXECUTION.md]
-  - plan: .specify/specs/{wave}/
-  - write: work/{wave}/
-  - update: HANDOFF.md
