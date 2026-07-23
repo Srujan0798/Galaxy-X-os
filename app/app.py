@@ -57,6 +57,7 @@ from inference import ModelManager, InferenceResult
 from gradcam import explain_image
 from dataset import CLASS_NAMES_DISPLAY
 from utils import get_device
+from bonus import generate_template_caption, detect_anomaly
 
 
 # ---------------------------------------------------------------------------
@@ -98,10 +99,23 @@ def render_sidebar():
         for i, cls in enumerate(CLASS_NAMES_DISPLAY):
             st.markdown(f"{i+1}. {cls}")
         st.markdown("---")
+        st.subheader("🔬 How to read the output")
+        st.markdown(
+            "- **Probabilities** — the model's confidence across all 5 classes.\n"
+            "- **Grad-CAM** — a heatmap of *where the model looked*; red = the "
+            "regions that drove the decision, so you can sanity-check that it "
+            "focused on the object and not the background.\n"
+            "- **Caption** — a plain-language description generated offline from "
+            "the prediction + image statistics.\n"
+            "- **Anomaly / OOD** — screens for uncertain or out-of-distribution "
+            "inputs using softmax entropy and max-probability."
+        )
+        st.markdown("---")
         st.subheader("ℹ️ About")
         st.markdown("**SCALE × ODYSSEY** classifies raw astronomical images into 5 "
                     "celestial categories using deep learning. Built with PyTorch + "
-                    "EfficientNet-B3 + Grad-CAM.")
+                    "EfficientNet-B3 + Grad-CAM. All explainability and bonus features "
+                    "run locally — no commercial APIs.")
 
 
 def render_prediction_result(result: InferenceResult):
@@ -144,17 +158,46 @@ def render_gradcam(image, manager):
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown("**Original Image**")
-                st.image(image, use_column_width=True)
+                st.image(image, use_container_width=True)
             with c2:
                 st.markdown("**Predicted-Class CAM**")
-                st.image(result["predicted_cam"], use_column_width=True)
+                st.image(result["predicted_cam"], use_container_width=True)
             if result.get("true_idx") != result["pred_idx"] and "true_cam" in result:
                 st.markdown("**True-Class CAM** (for comparison)")
-                st.image(result["true_cam"], use_column_width=True)
+                st.image(result["true_cam"], use_container_width=True)
             st.info(f"Model focused on highlighted regions to classify as **{result['pred_class']}**.")
         except Exception as e:
             st.error(f"Grad-CAM failed: {e}")
             st.info("Ensure grad-cam is installed: pip install grad-cam")
+
+
+def render_caption(image_path: str, result: InferenceResult):
+    st.markdown("---")
+    st.subheader("📝 Auto-Generated Caption")
+    st.caption("Offline template captioner — built from the predicted class, "
+               "confidence, and image brightness/contrast. No external API, no downloads.")
+    cap = generate_template_caption(result.class_name, result.confidence, image=image_path)
+    st.success(cap["caption"])
+
+
+def render_anomaly(result: InferenceResult):
+    st.markdown("---")
+    st.subheader("🛰️ Anomaly / Out-of-Distribution Check")
+    st.caption("Softmax entropy + maximum-probability screening. Flags uncertain "
+               "or novel inputs the model may not have seen in training.")
+    verdict = detect_anomaly(result.all_probabilities)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.metric("Max probability", f"{verdict['max_prob']:.2f}",
+                  help=f"Flagged if below {verdict['max_prob_threshold']:.2f}")
+    with c2:
+        st.metric("Entropy (bits)", f"{verdict['entropy']:.2f}",
+                  help=f"Flagged if above {verdict['entropy_threshold']:.2f} "
+                       f"(max possible {verdict['max_entropy_bits']:.2f})")
+    if verdict["is_anomaly"]:
+        st.warning(f"⚠️ {verdict['reason']}")
+    else:
+        st.info(f"✅ {verdict['reason']}")
 
 
 def render_footer():
@@ -191,7 +234,7 @@ def main():
         with left:
             st.markdown("---")
             st.subheader("🖼️ Uploaded Image")
-            st.image(temp_path, use_column_width=True)
+            st.image(temp_path, use_container_width=True)
 
         with right:
             with st.spinner("Analyzing..."):
@@ -200,6 +243,8 @@ def main():
             render_probability_chart(result)
 
         render_gradcam(temp_path, manager)
+        render_caption(temp_path, result)
+        render_anomaly(result)
 
         try:
             os.remove(temp_path)
