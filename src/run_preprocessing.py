@@ -9,12 +9,11 @@ Usage:
     python src/run_preprocessing.py
 """
 
-import os
 import json
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, List
+from typing import Dict
 
 import numpy as np
 from PIL import Image
@@ -36,7 +35,7 @@ def preprocess_image(preprocessor: AstroPreprocessor, img_path: Path, output_pat
         processed = preprocessor.preprocess(img)
         Image.fromarray(processed).save(output_path)
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 

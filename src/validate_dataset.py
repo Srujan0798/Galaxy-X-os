@@ -11,9 +11,7 @@ Usage:
 import json
 import time
 from pathlib import Path
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 from PIL import Image
@@ -193,7 +191,7 @@ def main():
     print("=" * 60)
     print(f"  Total valid images: {total_valid}")
     print(f"  Total corrupted: {total_corrupted}")
-    print(f"  Class weights: computed")
+    print("  Class weights: computed")
     print(f"  Dataset loading: {'PASS' if not dataset_errors else 'FAIL'}")
 
 

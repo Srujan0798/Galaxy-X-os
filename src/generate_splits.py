@@ -8,9 +8,7 @@ Usage:
     python src/generate_splits.py
 """
 
-import os
 import json
-import random
 from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List
