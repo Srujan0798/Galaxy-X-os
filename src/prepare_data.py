@@ -73,9 +73,23 @@ try:
 except Exception:  # pragma: no cover - defensive
     _HAVE_REPO_GENERATORS = False
 
+# REAL source #2 for nebula/star_cluster/planetary: NASA Image Library
+# (public, no API key). See src/download_archives.py.
+try:
+    from download_archives import fetch_archive_class as _nasa_fetch_class
+    _HAVE_NASA_ARCHIVES = True
+except Exception:  # pragma: no cover - defensive
+    _HAVE_NASA_ARCHIVES = False
+
 PROCESSED_DIR = Path("data/processed")
 RAW_DIR = Path("data/raw")
 SPLITS = {"train": 0.80, "val": 0.10, "test": 0.10}
+
+
+def _set_dirs(processed: str) -> None:
+    """Override the module-level PROCESSED_DIR (used by --output-dir / tests)."""
+    global PROCESSED_DIR
+    PROCESSED_DIR = Path(processed)
 
 # Image = uint8 RGB HxWx3 numpy array throughout this module.
 Array = np.ndarray
@@ -111,6 +125,35 @@ KAGGLE_DATASETS = {
     "planetary": ("brsdincer/planetary-solar-system-objects",
                   ["planet", "planetary", "moon", "satellite", "mars",
                    "jupiter", "saturn", "lunar"]),
+}
+
+# ESA Hubble FITS-liberator "Datasets for education and for fun" public archive.
+# https://esahubble.org/projects/fits_liberator/datasets/  (see PROBLEM_STATEMENT.md)
+# Each entry maps one of our classes to a curated set of public-domain Hubble
+# science images. These are direct JPG/PNG renditions of the named objects and
+# require NO API key (unlike Kaggle) and NO ~200 MB download (unlike Galaxy10).
+# We cap the per-object take so the archive can't dominate the class budget.
+ESA_HUBBLE_OBJECTS: Dict[str, List[Tuple[str, str]]] = {
+    # Real nebulae -- Eagle, Orion (M42), M17, N11B, Bug Nebula (NGC 6302).
+    "nebula": [
+        ("eagle_nebula", "https://esahubble.org/images/heic0506c/"),
+        ("orion_m42", "https://esahubble.org/images/opo0304a/"),
+        ("m17_nebula", "https://esahubble.org/images/heic0602a/"),
+        ("bug_nebula_ngc6302", "https://esahubble.org/images/heic0203a/"),
+    ],
+    # Real star clusters -- Globular M12, Globular NGC 6652, Open M35.
+    "star_cluster": [
+        ("globular_m12", "https://esahubble.org/images/heic0609a/"),
+        ("globular_ngc6652", "https://esahubble.org/images/potw2032a/"),
+        ("open_m35", "https://esahubble.org/images/heic0807a/"),
+    ],
+    # Real planetary objects -- Venus UV, NGC 5307 / NGC 6309 (planetary nebulae
+    # named per the ESA Hubble "planetary nebula" dataset entries).
+    "planetary": [
+        ("venus_uv", "https://esahubble.org/images/heic0403a/"),
+        ("ngc5307", "https://esahubble.org/images/potw1034a/"),
+        ("ngc6309_box", "https://esahubble.org/images/potw1526a/"),
+    ],
 }
 
 
@@ -219,7 +262,37 @@ def get_galaxy10(per_class: int, image_size: int, rng: random.Random
 
 
 # ---------------------------------------------------------------------------
-# REAL source 2: Kaggle  (nebula + star_cluster + planetary)
+# REAL source 2: NASA Image Library  (nebula + star_cluster + planetary)
+# Public JSON API, NO API key. Tried BEFORE Kaggle and BEFORE procedural.
+# ---------------------------------------------------------------------------
+
+def get_nasa_classes(classes: List[str], per_class: int, image_size: int
+                     ) -> Dict[str, Tuple[List[Array], str]]:
+    """Return {class: (images, source_label)} from the NASA Image Library.
+
+    Real telescope imagery (Hubble / Spitzer / JPL) fetched by keyword with
+    per-class purity filters (see src/download_archives.py). No credentials.
+    """
+    if not _HAVE_NASA_ARCHIVES:
+        print("  [nasa] download_archives not importable; skipping NASA source.")
+        return {}
+    result: Dict[str, Tuple[List[Array], str]] = {}
+    for cls in classes:
+        try:
+            arrs, source = _nasa_fetch_class(cls, per_class, image_size)
+        except Exception as e:  # pragma: no cover - network defensive
+            print(f"  [nasa] {cls}: fetch failed ({e}).")
+            continue
+        if arrs:
+            result[cls] = (arrs, source)
+            print(f"  [nasa] {cls}: {len(arrs)} real images from NASA Image Library.")
+        else:
+            print(f"  [nasa] {cls}: no images returned.")
+    return result
+
+
+# ---------------------------------------------------------------------------
+# REAL source 3: Kaggle  (nebula + star_cluster + planetary)
 # ---------------------------------------------------------------------------
 
 def kaggle_credentials_present() -> bool:
@@ -336,6 +409,74 @@ def get_kaggle_classes(classes: List[str], per_class: int, image_size: int
             print(f"  [kaggle] {cls}: {len(arrs)} real images from {ref}.")
         else:
             print(f"  [kaggle] {cls}: no matching images found in {ref}.")
+    return result
+
+
+# ---------------------------------------------------------------------------
+# LEGACY (not in default precedence): ESA Hubble object-page scraper.
+# Superseded by the NASA Image Library (REAL source 2), whose no-auth JSON API
+# is stable. Kept for reference only -- assemble() no longer calls this. The
+# ESA per-object image-URL pattern is not a confirmed stable endpoint, so we do
+# NOT rely on it for the real-data guarantee.
+# ---------------------------------------------------------------------------
+
+def _esa_hubble_image_url(page_url: str) -> Optional[str]:
+    """Resolve an ESA/Hubble object page to its direct full-resolution JPG.
+
+    ESA Hubble pages expose a predictable /images/<id>/ pattern; the actual
+    image renditions live at https://esahubble.org/media/archives/images/<id>/jpg/<id>.jpg
+    We try a couple of common forms and return the first 200-OK URL.
+    """
+    import urllib.request
+    oid = page_url.rstrip("/").split("/")[-1]
+    candidates = [
+        f"https://esahubble.org/media/archives/images/{oid}/jpg/{oid}.jpg",
+        f"https://esahubble.org/media/archives/images/{oid}/jpg/{oid}_large.jpg",
+        f"https://esahubble.org/media/archives/images/{oid}/jpg/{oid}.jpg",
+    ]
+    for u in candidates:
+        try:
+            req = urllib.request.Request(u, method="HEAD",
+                                         headers={"User-Agent": "galaxy-x-os/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                if r.status == 200 and "image" in r.headers.get("Content-Type", ""):
+                    return u
+        except Exception:
+            continue
+    return None
+
+
+def get_esa_hubble_classes(classes: List[str], per_class: int, image_size: int
+                           ) -> Dict[str, Tuple[List[Array], str]]:
+    """Fetch real ESA/Hubble imagery for nebula/cluster/planetary (no auth)."""
+    import urllib.request
+
+    result: Dict[str, Tuple[List[Array], str]] = {}
+    url = "https://esahubble.org/projects/fits_liberator/datasets/"
+    for cls in classes:
+        if cls not in ESA_HUBBLE_OBJECTS:
+            continue
+        arrs: List[Array] = []
+        for obj_name, page_url in ESA_HUBBLE_OBJECTS[cls]:
+            if len(arrs) >= per_class:
+                break
+            img_url = _esa_hubble_image_url(page_url)
+            if img_url is None:
+                print(f"  [esa-hubble] {cls}/{obj_name}: image URL not resolvable.")
+                continue
+            try:
+                req = urllib.request.Request(img_url, headers={"User-Agent": "galaxy-x-os/1.0"})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    raw = r.read()
+                arrs.append(to_rgb_uint8(np.array(Image.open(__import__("io").BytesIO(raw)).convert("RGB")),
+                                         image_size))
+                print(f"  [esa-hubble] {cls}/{obj_name}: +1 real image.")
+            except Exception as e:
+                print(f"  [esa-hubble] {cls}/{obj_name}: fetch failed ({e}).")
+        arrs = dedupe(arrs)
+        if arrs:
+            result[cls] = (arrs, f"ESA Hubble | {url}")
+            print(f"  [esa-hubble] {cls}: {len(arrs)} real images.")
     return result
 
 
@@ -481,10 +622,23 @@ def assemble(per_class: int, image_size: int, seed: int, real_only: bool
     manifest: Dict[str, dict] = {}
 
     print("\n[1/3] Acquiring REAL sources...")
+    non_galaxy = ["nebula", "star_cluster", "planetary"]
+    # spiral/elliptical: Galaxy10 (real, no key).
     galaxy = get_galaxy10(per_class, image_size, py_rng)
-    kaggle = get_kaggle_classes(["nebula", "star_cluster", "planetary"],
-                                per_class, image_size)
-    real = {**galaxy, **kaggle}
+    # nebula/star_cluster/planetary precedence:
+    #   NASA Image Library (real, no key)  ->  Kaggle (real, needs creds).
+    # NASA is tried FIRST; Kaggle only fills classes NASA didn't cover.
+    nasa = get_nasa_classes(non_galaxy, per_class, image_size)
+    kaggle_needed = [c for c in non_galaxy if c not in nasa]
+    kaggle = (get_kaggle_classes(kaggle_needed, per_class, image_size)
+              if kaggle_needed else {})
+    # Merge with precedence NASA > Kaggle (galaxy keys are disjoint).
+    real: Dict[str, Tuple[List[Array], str]] = {**galaxy}
+    for cls in non_galaxy:
+        if cls in nasa:
+            real[cls] = nasa[cls]
+        elif cls in kaggle:
+            real[cls] = kaggle[cls]
 
     print("\n[2/3] Filling / balancing each class to "
           f"{per_class} images...")
@@ -649,6 +803,9 @@ def parse_args() -> argparse.Namespace:
                    help="Output square image size (default: config data.image_size or 224).")
     p.add_argument("--real-only", action="store_true",
                    help="Disable procedural fallback; use only real images.")
+    p.add_argument("--output-dir", type=str, default=None,
+                   help="Override processed output dir (default: data/processed). "
+                        "Use in tests to avoid clobbering the committed manifest.")
     return p.parse_args()
 
 
@@ -667,6 +824,9 @@ def main() -> None:
     image_size = resolve_image_size(args.image_size)
     random.seed(args.seed)
     np.random.seed(args.seed)
+
+    if args.output_dir:
+        _set_dirs(args.output_dir)
 
     print("=" * 84)
     print("Galaxy-X-os -- Data Preparation (REAL-first, SAFE-fallback, idempotent)")

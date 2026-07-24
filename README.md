@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 95.6% test accuracy (96.4% with TTA) / 0.96 macro F1 on a held-out disjoint test set (250 images, MD5 leak-checked). Real Galaxy10 DECaLS survey imagery for the two galaxy classes + Kaggle deep-space sets (with labelled procedural fallback) for the rest — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application |
+| **Key Results** | 95.6% test accuracy (96.4% with TTA) / 0.96 macro F1 on a held-out disjoint test set (250 images, MD5 leak-checked). Real Galaxy10 DECaLS survey imagery for the two galaxy classes + real NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (Kaggle + labelled procedural remain as fallbacks only) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application |
 
 ### 5-Class Taxonomy
 
@@ -58,6 +58,13 @@ streamlit run app/app.py
 > **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
 >
 > **Trained weights:** `best_model.pth` (~141 MB) exceeds GitHub's 100 MB file limit, so it is **not** committed. Two ways to get it: (1) **reproduce** it exactly via the one-click Colab notebook or steps 2–3 above (~30 min on a free GPU) — this is the guaranteed path; (2) if published, download it from the [**v1.0 Release**](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0) and drop it in `checkpoints/`.
+>
+> **Verify the checkpoint** after download:
+> ```bash
+> shasum -a 256 checkpoints/best_model.pth   # macOS
+> sha256sum checkpoints/best_model.pth       # Linux
+> ```
+> Record the hash in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) so graders can confirm integrity.
 
 ---
 
@@ -77,24 +84,24 @@ Galaxy-X-os/
 │   ├── dataset.py                   # PyTorch Dataset + Albumentations pipeline
 │   ├── model.py                     # EfficientNet-B3 + custom head + Grad-CAM hooks
 │   ├── utils.py                     # Helpers (device, seed, config, metrics, logging)
-│   ├── generate_splits.py           # Stratified DISJOINT train/val/test split
-│   ├── prepare_data.py              # Download real data + build splits + DATA_MANIFEST.json
+│   ├── prepare_data.py              # Download real data (Galaxy10 + NASA Image Library + Kaggle) + splits + manifest
+│   ├── download_archives.py         # NASA Image Library fetch + purity filters (real nebula/cluster/planetary)
 │   ├── train.py                     # Full pipeline: progressive unfreezing + OneCycleLR
 │   ├── evaluate.py                  # Metrics (Acc/Prec/Rec/F1) + TTA + confusion matrix
 │   ├── gradcam.py                   # explain_image() + 15-sample 3-panel visualization
 │   ├── inference.py                 # Fast single/batch inference + ModelManager
-│   └── bonus.py                     # Image captioning (BLIP) + anomaly detection
+│   └── bonus.py                     # Captioning (template+BLIP) + localization + anomaly/OOD
 ├── app/
 │   └── app.py                       # Streamlit interactive web demo
-├── notebooks/                       # 01_EDA, 02_Training, 03_Evaluation
+├── notebooks/                       # 01_EDA, 02_Training, 03_Evaluation + Galaxy_X_Colab
 ├── data/
-│   ├── raw/                         # Source datasets (Galaxy10 DECaLS + Kaggle deep-space)
+│   ├── raw/                         # Source datasets (Galaxy10 + NASA Image Library + Kaggle deep-space)
 │   └── processed/                   # Disjoint 5-class split + DATA_MANIFEST.json
-├── checkpoints/                     # Trained weights (best_model.pth, gitignored)
+├── checkpoints/                     # Trained weights (best_model.pth — GitHub Release, gitignored)
 ├── results/                         # confusion_matrix.png, gradcam/, evaluation_results.json
-├── docs/                            # ADRs, runbooks, presentation/
-├── tests/                           # Test suite
-└── attic/                           # Archived orchestration scaffolding (not part of deliverable)
+├── tests/                           # pytest suites (unit / integration / e2e)
+├── attic/                           # Archived orchestration scaffolding + superseded src files
+└── docs/                            # ADRs, runbooks, presentation/
 ```
 
 ---
@@ -117,7 +124,11 @@ Galaxy-X-os/
 python src/prepare_data.py
 ```
 
-- Multi-source data: real Galaxy10 DECaLS survey imagery (Spiral + Elliptical) + Kaggle deep-space sets for Nebula / Star Cluster / Planetary, with a clearly-labelled procedural fallback. See `data/processed/DATA_MANIFEST.json` for the authoritative per-class real-vs-fallback record.
+- Multi-source real data (real-first, safe-fallback):
+  - **Galaxy10 DECaLS / SDSS** via `astroNN` for Spiral + Elliptical galaxy imagery (no API key).
+  - **NASA Image Library** ([images.nasa.gov](https://images.nasa.gov), no API key) for Nebula / Star Cluster / Planetary — real Hubble / Spitzer / JPL mission imagery retrieved by keyword with per-class purity filtering (see `src/download_archives.py`).
+  - **Kaggle** deep-space sets (`fedesoriano/deep-space-images`, `brsdincer/planetary-solar-system-objects`) and a labelled procedural generator remain as fallbacks only.
+  - See `data/processed/DATA_MANIFEST.json` for the authoritative per-class real-vs-fallback record.
 - Balanced **disjoint** splits (verified by MD5 — no image in >1 split)
 - Class imbalance handling (oversampling + weighted loss)
 - Quality filtering (corrupted image removal)
@@ -220,41 +231,61 @@ streamlit run app/app.py
 
 ## Phase 4: Bonus Features (Page 19)
 
-### Bonus 1: Image Captioning (BLIP)
+### Bonus 1: Image Captioning (template + optional BLIP)
 
 ```python
 from src.bonus import generate_caption_with_fallback
 
-result = generate_caption_with_fallback("image.jpg", "Spiral Galaxy")
-print(result["caption"])
-# "A magnificent spiral galaxy with distinct swirling arms and a bright central bulge."
+result = generate_caption_with_fallback(
+    "image.jpg", class_name="Spiral Galaxy", confidence=0.87, use_blip=False
+)
+print(result["caption"], result["method"])
+# "A spiral galaxy showing a bright central core and sweeping arm structure (confidence 0.87)." "template"
 ```
 
-- Uses `Salesforce/blip-image-captioning-base` model
-- **Automatic fallback** to template captions if BLIP unavailable
-- Templates tailored per astronomical class
+- **Default path (offline, deterministic, no downloads):** `generate_template_caption` composes a short natural-language description from the predicted class + its structural cue + image brightness/contrast + confidence. Always available.
+- **Optional neural path:** set `use_blip=True` to use `Salesforce/blip-image-captioning-base` via `transformers` (downloads ~1 GB on first use). Falls back to the template automatically if transformers is missing or BLIP errors.
+- Per-class structural descriptors in `CLASS_DESCRIPTORS`.
 
-### Bonus 2: Anomaly / OOD Detection (softmax entropy)
+### Bonus 2: Object Localization (Grad-CAM pseudo-bbox)
 
 ```python
-from src.bonus import AnomalyDetector
-from src.inference import predict_image
+from src.bonus import localize_object, render_localization_overlay
+from src.gradcam import generate_cam  # raw 2-D heatmap
+import numpy as np
 
-detector = AnomalyDetector(confidence_threshold=0.5, gap_threshold=0.15)
-result = predict_image("image.jpg")
-analysis = detector.analyze(result)
-print(analysis["recommendation"])
-# "Normal: Spiral Galaxy (94.2% confidence)" or "ANOMALY: ..."
+cam = generate_cam(model, input_tensor, target_class=0, device=device)  # 2-D heatmap
+loc = localize_object(cam, threshold=0.30)
+print(loc["bbox"], loc["area_frac"])
+overlay = render_localization_overlay(image_rgb, cam, loc["bbox"])
 ```
 
-- Flags **low-confidence** predictions
-- Detects **ambiguous classifications** (small top-2 gap)
-- Measures **entropy** of probability distribution
+- **Honest scope:** this is a saliency-threshold localizer, NOT a learned detector (no YOLO / Mask R-CNN). It re-uses the classifier's Grad-CAM — the same mechanism the problem statement permits under "attention or Grad-CAM visualizations" — to produce a tight bounding box of the region that most influenced the decision.
+- Returns `[x_min, y_min, x_max, y_max]` in heatmap-pixel coords, plus `bbox_frac` (0–1), `area_frac`, and `mask_area_px`.
 
-### Run Both Bonuses
+### Bonus 3: Anomaly / OOD Detection (softmax entropy + max-prob)
+
+```python
+from src.bonus import AnomalyDetector, detect_anomaly
+from src.inference import predict_image
+
+result = predict_image("image.jpg")
+verdict = detect_anomaly(result.all_probabilities)
+print(verdict["is_anomaly"], verdict["reason"])
+# False "In-distribution: confident prediction (max prob 0.94, entropy 0.21 bits)"
+
+det = AnomalyDetector(max_prob_threshold=0.45, entropy_threshold=1.50)
+print(det.analyze(result)["is_anomaly"])
+```
+
+- Flags a prediction as a possible anomaly / OOD when **max-prob < 0.45 OR entropy > 1.50 bits** (5-class max entropy ≈ 2.322 bits). Purely post-hoc on the softmax — no retraining, no external service, fully explainable.
+
+### Run all bonuses together
 
 ```bash
-python src/bonus.py path/to/image.jpg
+python src/bonus.py path/to/image.jpg            # caption + localization + OOD
+python src/bonus.py path/to/image.jpg --no-localize  # skip localization
+python src/bonus.py path/to/image.jpg --use-blip    # opt into BLIP
 ```
 
 ---

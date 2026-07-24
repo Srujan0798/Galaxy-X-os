@@ -37,7 +37,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 | # | Required item | Location |
 |---|---------------|----------|
-| 1 | **Dataset Sources** | `REPORT.md` → *Dataset Sources* (real Galaxy10 DECaLS survey imagery for Spiral + Elliptical; Kaggle deep-space sets for Nebula / Star Cluster / Planetary with labelled procedural fallback; disjoint stratified split, MD5 leakage check, honest `DATA_MANIFEST.json`) |
+| 1 | **Dataset Sources** | `REPORT.md` → *Dataset Sources* (real Galaxy10 DECaLS survey imagery for Spiral + Elliptical; real NASA Image Library imagery (images.nasa.gov, no API key) for Nebula / Star Cluster / Planetary with per-class purity filtering, Kaggle + labelled procedural as fallbacks only; disjoint stratified split, MD5 leakage check, honest `DATA_MANIFEST.json`) |
 | 2 | **Model Architecture** | `REPORT.md` → *Model Architecture* (EfficientNet-B3, transfer learning, AdamW, OneCycleLR); code in `src/model.py` |
 | 3 | **Final Test Metrics (Acc / Precision / Recall / F1)** | `REPORT.md` → *Final Test Metrics* (**95.6% std, 96.4% TTA**, macro-F1 0.956 / 0.964, per-class F1); raw numbers `results/evaluation_results.json` |
 | 4 | **Confusion Matrix** | `REPORT.md` → *Confusion Matrix* references `results/confusion_matrix.png` (+ `results/per_class_metrics.png`) |
@@ -57,7 +57,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 **Done**
 - End-to-end pipeline: data prep → train → evaluate (+TTA) → Grad-CAM → Streamlit demo.
-- Real data sources: Galaxy10 DECaLS survey imagery (via astroNN) for Spiral + Elliptical; Kaggle deep-space images (`fedesoriano/deep-space-images`, `brsdincer/planetary-solar-system-objects`) for Nebula / Star Cluster / Planetary, with clearly-labelled procedural fallback so the pipeline never breaks.
+- Real data sources: Galaxy10 DECaLS survey imagery (via astroNN) for Spiral + Elliptical; **NASA Image Library** (images.nasa.gov, no API key — Hubble/Spitzer/JPL) for Nebula / Star Cluster / Planetary, retrieved by keyword with per-class purity filtering (`src/download_archives.py`). Kaggle deep-space images (`fedesoriano/deep-space-images`, `brsdincer/planetary-solar-system-objects`) and a clearly-labelled procedural fallback remain as fallbacks only, so the pipeline never breaks. All five classes can now be built from real imagery with no API key.
 - Honest per-class source record in `data/processed/DATA_MANIFEST.json` (rebuilt by `python src/prepare_data.py`).
 - Disjoint stratified split, verified by MD5 hash that no image appears in >1 split.
 - Full one-page report with all 7 required items, exported to PDF.
