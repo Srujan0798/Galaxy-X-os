@@ -57,7 +57,7 @@ streamlit run app/app.py
 
 > **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
 >
-> **Trained weights:** the trained `best_model.pth` (~141 MB) exceeds GitHub's 100 MB file limit, so it is published as a GitHub Release asset — download it from https://github.com/Srujan0798/Galaxy-X-os/releases/latest and drop it in `checkpoints/`. You can also reproduce it via steps 2–3 above.
+> **Trained weights:** `best_model.pth` (~141 MB) exceeds GitHub's 100 MB file limit, so it is **not** committed. Two ways to get it: (1) **reproduce** it exactly via the one-click Colab notebook or steps 2–3 above (~30 min on a free GPU) — this is the guaranteed path; (2) if published, download it from the [**v1.0 Release**](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0) and drop it in `checkpoints/`.
 
 ---
 

@@ -68,4 +68,4 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 - Final model was trained on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` — full EfficientNet-B3 fine-tune, 250-image held-out test set.
 - Final honest test result: **95.6% accuracy (96.4% with TTA)**, macro-F1 **0.956 / 0.964**.
 - Residual confusion is between Spiral and Elliptical Galaxy (visually similar morphologies), surfaced openly in the report and Grad-CAM figures.
-- The trained weights (`checkpoints/best_model.pth`, ~141 MB) exceed GitHub's 100 MB file limit, so they are published as a GitHub Release asset: https://github.com/Srujan0798/Galaxy-X-os/releases/latest. Also fully reproducible via `python src/prepare_data.py` → `python src/train.py`.
+- The trained weights (`checkpoints/best_model.pth`, ~141 MB) exceed GitHub's 100 MB file limit, so they are **not** committed. Guaranteed path: reproduce them via `python src/prepare_data.py` → `python src/train.py` (or the one-click `notebooks/Galaxy_X_Colab.ipynb`). If published, they are also attached to the [v1.0 Release](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0).
