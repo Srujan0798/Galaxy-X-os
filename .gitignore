@@ -45,6 +45,12 @@ checkpoints/*.pth
 !checkpoints/.gitkeep
 results/*
 !results/.gitkeep
+# Exception: keep the evaluation artifacts (small, useful for review).
+!results/evaluation_results.json
+!results/confusion_matrix.png
+!results/per_class_metrics.png
+!results/confidence_distribution.png
+!results/gradcam/
 logs/*
 !logs/.gitkeep
 

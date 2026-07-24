@@ -22,26 +22,28 @@
 
 ## Final Test Metrics
 
-Evaluated on the held-out **disjoint** test set (200 images, 40 per class — none seen in training). Macro-averaged.
+Evaluated on the held-out **disjoint** test set (250 images, 50 per class — none seen in training). Macro-averaged.
 
 | Metric | Standard | + TTA (6× aug) |
 |---|---|---|
-| **Accuracy** | **72.0%** | **74.5%** |
-| **Precision (macro)** | **0.716** | — |
-| **Recall (macro)** | **0.720** | — |
-| **F1 (macro)** | **0.711** | **0.741** |
+| **Accuracy** | **95.6%** | **96.4%** |
+| **Precision (macro)** | **0.958** | — |
+| **Recall (macro)** | **0.956** | — |
+| **F1 (macro)** | **0.956** | **0.964** |
 
 **Per-class F1 (Standard):**
 
 | Class | F1 |
 |---|---|
-| Elliptical Galaxy | 1.000 |
+| Spiral Galaxy | 0.884 |
+| Elliptical Galaxy | 0.895 |
 | Nebula | 1.000 |
-| Planetary Object | 0.660 |
-| Star Cluster | 0.400 |
-| Spiral Galaxy | 0.494 |
+| Star Cluster | 1.000 |
+| Planetary Object | 1.000 |
 
-*Strongest on Elliptical/Nebula (near-perfect); Spiral vs Star Cluster confusion drives the lower macro score (visually similar diffuse structures). TTA adds ~+2.5% accuracy.*
+*Strongest on Nebula / Star Cluster / Planetary (perfect). Spiral vs Elliptical confusion is the residual error — both are galaxy morphologies with overlapping visual cues. TTA adds +0.8% accuracy.*
+
+See `data/processed/DATA_MANIFEST.json` for the honest per-class source breakdown (which classes came from real Galaxy10 / Kaggle vs procedural fallback).
 
 ## Confusion Matrix
 

@@ -3,7 +3,7 @@
 **Sequence-Based Classification of Astronomical Objects Using Deep Learning**
 
 > Deep learning model for classifying raw astronomical images into 5 celestial categories.
-> **TechOIITGN Hackathon Submission** | **72.0% test accuracy (74.5% with TTA, 0.71 macro F1)** | **Grad-CAM explainability + Web Demo**
+> **TechOIITGN Hackathon Submission** | **95.6% test accuracy (96.4% with TTA, 0.96 macro F1)** | **Grad-CAM explainability + Web Demo**
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 72.0% test accuracy (74.5% with TTA) / 0.71 macro F1 on real SDSS DR17 + merged Kaggle galaxy data (verified disjoint split, no leakage), professional Grad-CAM visualizations, interactive web application |
+| **Key Results** | 95.6% test accuracy (96.4% with TTA) / 0.96 macro F1 on real SDSS DR17 + merged Kaggle galaxy data (verified disjoint split, no leakage), professional Grad-CAM visualizations, interactive web application |
 
 ### 5-Class Taxonomy
 
