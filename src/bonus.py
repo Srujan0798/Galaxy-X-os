@@ -65,15 +65,6 @@ CLASS_DESCRIPTORS: Dict[str, Dict[str, str]] = {
     },
 }
 
-# Backwards-compatible full-sentence templates (used by legacy callers/tests).
-CLASS_CAPTIONS = {
-    "Spiral Galaxy": "A magnificent spiral galaxy with distinct swirling arms and a bright central bulge.",
-    "Elliptical Galaxy": "A smooth elliptical galaxy with an oval shape and uniform stellar distribution.",
-    "Nebula": "A colorful nebula with glowing gas clouds and dust illuminated by nearby stars.",
-    "Star Cluster": "A dense cluster of bright stars tightly bound together by gravitational forces.",
-    "Planetary Object": "A planetary object showing distinct surface features and possible atmospheric details.",
-}
-
 
 def _describe_brightness(mean_luminance: float) -> str:
     """Map a 0-255 mean luminance to a human word. Deterministic."""
