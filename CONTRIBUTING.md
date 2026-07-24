@@ -1,21 +1,30 @@
 # Contributing
 
-## How to Contribute
+## Quick Loop
 
-1. Pick a task from `work/wave-N/`
-2. Create a feature branch
-3. Write code + tests
-4. Run `make test` and `make lint`
-5. Submit report to `work/reports/wave-N/`
+```bash
+pip install -r requirements.txt
+pytest tests/ -v            # unit tests
+ruff check src/             # lint
+```
 
 ## Code Style
 
-- Python: PEP 8, ruff, mypy
+- Python 3.10+, PEP 8, ruff
 - Docstrings: Google style
-- Types: annotate all public functions
+- Type annotations on public functions
 
 ## Testing
 
-- Unit tests in `tests/unit/`
-- Integration tests in `tests/integration/`
-- Run full suite: `make test`
+- Unit tests: `tests/unit/`
+- Integration tests: `tests/integration/` (currently empty)
+- e2e tests: `tests/e2e/` (currently empty)
+- Run all: `pytest tests/ -v`
+
+## Project Layout
+
+- `src/` — main pipeline (prepare_data, train, evaluate, gradcam, inference, bonus)
+- `app/` — Streamlit web demo
+- `configs/config.yaml` — single source of truth
+- `notebooks/Galaxy_X_Colab.ipynb` — one-click Colab pipeline
+- `data/`, `checkpoints/`, `results/` — gitignored (reproducible via `src/prepare_data.py` + `src/train.py`)

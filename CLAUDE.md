@@ -9,19 +9,22 @@
 - **Domain:** Computer Vision / ML / Astronomical Imaging
 - **Tech Stack:** Python, PyTorch, EfficientNet-B3, Albumentations, Streamlit, Grad-CAM
 - **Tier:** T1 (Standard)
-- **MVP:** Ingest one telescope image, output one of 5 class predictions with confidence
+- **Final model:** EfficientNet-B3, **95.6% test accuracy / 96.4% TTA / 0.96 macro F1**
 
 ## Quick Commands
 
 | Command | Purpose |
 |---------|---------|
-| `make install` | Install dependencies |
-| `make train` | Run training pipeline |
-| `make evaluate` | Run evaluation + TTA |
-| `make gradcam` | Generate Grad-CAM visualizations |
-| `make app` | Launch Streamlit demo |
-| `make test` | Run all tests |
-| `make lint` | Run ruff + mypy |
+| `pip install -r requirements.txt` | Install dependencies |
+| `python src/prepare_data.py` | Build the 5-class dataset (real-first) |
+| `python src/train.py` | Train EfficientNet-B3 (needs GPU for reasonable time) |
+| `python src/evaluate.py` | Evaluate (standard + TTA) |
+| `python src/gradcam.py` | Generate Grad-CAM visualizations |
+| `streamlit run app/app.py` | Launch Streamlit demo |
+| `pytest tests/ -v` | Run all tests |
+| `ruff check src/` | Lint |
+
+For a one-click Colab GPU run: `notebooks/Galaxy_X_Colab.ipynb` → `Runtime → Run all`.
 
 ## Architecture Overview
 
@@ -33,21 +36,18 @@ Raw Images → Preprocess → AstroDataset → EfficientNet-B3 → 5-Class Outpu
 
 ## Directory Map
 
-| Path | Purpose | Owner |
-|------|---------|-------|
-| `src/` | Source code | Workers |
-| `app/` | Streamlit demo | Workers |
-| `notebooks/` | EDA + training + evaluation | Workers |
-| `config/` | YAML configs | Orchestrator |
-| `data/` | Raw + processed datasets | Workers |
-| `checkpoints/` | Model weights | Workers |
-| `results/` | Logs, Grad-CAM, plots | Workers |
-| `tests/` | All test suites | Workers |
-| `orchestrator/` | Tier-1 governance | Orchestrator |
-| `work/` | Task bridge | Orchestrator writes, Workers read |
-| `plan/` | PRD, ARCH, EXECUTION | Orchestrator |
-| `docs/` | ADRs, runbooks, conventions | Orchestrator |
-| `evals/` | Eval tasks + graders | Orchestrator |
+| Path | Purpose |
+|------|---------|
+| `src/` | Source code (prepare_data, train, evaluate, gradcam, inference, bonus, model, dataset, utils, augmentations, preprocess) |
+| `app/` | Streamlit web demo |
+| `notebooks/` | `Galaxy_X_Colab.ipynb` — one-click Colab pipeline |
+| `configs/` | `config.yaml` — single source of truth |
+| `data/` | Raw + processed datasets (gitignored, reproducible) |
+| `checkpoints/` | Model weights (gitignored — 134 MB) |
+| `results/` | Evaluation artifacts (committed: PNGs + JSON + gradcam/) |
+| `tests/` | pytest suites (unit/, integration/, e2e/) |
+| `docs/` | Runbooks, conventions, decision log, wave briefs |
+| `attic/`, `docs/historical/` | Archived orchestration scaffolding |
 
 ## Risk Tier
 
@@ -66,19 +66,10 @@ This project is **T1 — Standard**.
 | Add deps, change CI | r2 | Await approval |
 | rm -rf, force-push | r3 | Block |
 
-## Session Recovery
-
-If this session crashes:
-1. Reopen Claude Code in this directory
-2. This file auto-loads
-3. Read `HANDOFF.md` for current wave state
-4. Read latest `orchestrator/memory/session/*.events.jsonl`
-5. Resume from last event
-
 ## Core Rules
 
-1. Orchestrator plans and reviews. Workers execute.
-2. Handoff is `work/<wave>/<task>.md` → `work/reports/<wave>/<task>.report.md`
-3. Never delete — move to `attic/`, `docs/historical/`, `prompts/archive/`
-4. Every wave ships before next wave begins
-5. Run acceptance before approving any merge
+1. All waves are complete — submission ready.
+2. Never delete — move to `attic/` or `docs/historical/`.
+3. Keep `REPORT.md`, `README.md`, `SUBMISSION.md` in sync with real numbers.
+4. `configs/config.yaml` is the single source of truth.
+5. Commit evaluation artifacts (PNGs + JSON), not the 134 MB `.pth`.

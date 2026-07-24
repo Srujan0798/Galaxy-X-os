@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
 COPY app/ ./app/
-COPY config/ ./config/
+COPY configs/ ./configs/
 
 EXPOSE 8501
 CMD ["streamlit", "run", "app/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
