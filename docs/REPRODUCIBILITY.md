@@ -4,7 +4,7 @@
 
 | Claim | Source of truth | How to reproduce |
 |---|---|---|
-| 95.6% test acc / 96.4% TTA / 0.956 macro F1 | `results/evaluation_results.json` | Run `notebooks/Galaxy_X_Colab.ipynb` end-to-end on a Colab T4 (free). |
+| 93.17% test acc / 92.77% TTA / 0.932 macro F1 | `results/evaluation_results.json` | Run `notebooks/Galaxy_X_Colab.ipynb` end-to-end on a Colab T4 (free). |
 | 15 Grad-CAM figures | `results/gradcam/*.png` | `python src/gradcam.py` with the trained checkpoint. |
 | Confusion matrix + per-class F1 | `results/confusion_matrix.png`, `results/per_class_metrics.png` | `python src/evaluate.py`. |
 
@@ -16,7 +16,7 @@
    **It is NOT the training manifest.** It exists to prove the pipeline runs.
 2. **Colab training manifest** — produced by `notebooks/Galaxy_X_Colab.ipynb`
    on a Colab T4 with real Galaxy10 + Kaggle data (creds via the notebook's
-   Kaggle-token cell). The reported 95.6% / 96.4% come from this run. The
+   Kaggle-token cell). The reported 93.17% / 92.77% come from this run. The
    per-class F1s in `results/evaluation_results.json` (Spiral 0.884, Elliptical
    0.895, Nebula/Cluster/Planetary 1.000) reflect real imagery for the two
    galaxy classes and Kaggle/procedural for the rest.
@@ -35,7 +35,7 @@
 After downloading, verify integrity against this hash:
 
 ```
-SHA256: fab9935356e8a0cfa1803be3deabf998e2b6f3fa56b017ef0f6101eaf232c88b
+SHA256: e060f11b3fc5b5d25fb02d3ca1e6ee11dab5109e7f8d973aa894a494d9e8395a
 Size:   134 MB (140328300 bytes)
 ```
 
@@ -51,8 +51,8 @@ sha256sum checkpoints/best_model.pth       # Linux
 >
 > ```bash
 > gh release create v1.0 checkpoints/best_model.pth docs/presentation/demo.mp4 \
->   --title "v1.0 — Trained EfficientNet-B3 (95.6% / 96.4% TTA)" \
->   --notes "Final trained model. SHA256: fab9935356e8a0cfa1803be3deabf998e2b6f3fa56b017ef0f6101eaf232c88b. Drop in checkpoints/best_model.pth then run python src/evaluate.py to reproduce 95.6%/96.4% TTA. Demo video: docs/presentation/demo.mp4."
+>   --title "v1.0 — Trained EfficientNet-B3 (93.17% / 92.77% TTA)" \
+>   --notes "Final trained model. SHA256: e060f11b3fc5b5d25fb02d3ca1e6ee11dab5109e7f8d973aa894a494d9e8395a. Drop in checkpoints/best_model.pth then run python src/evaluate.py to reproduce 93.17%/92.77% TTA. Demo video: docs/presentation/demo.mp4."
 > ```
 
 ## Environment

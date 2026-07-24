@@ -13,7 +13,7 @@
 
 ## Model & results
 - **Architecture:** EfficientNet-B3 (timm, ImageNet pretrained), ~11.6M params, 224×224 input.
-- **Current metrics** (procedural-fallback data run): 95.6% acc / 96.4% TTA / macro-F1 0.956 / 0.964.
+- **Current metrics** (fully-real Colab T4 run): 93.17% acc / 92.77% TTA / macro-F1 0.932 / 0.928.
 - **Inference:** ~72 ms/image median on Apple MPS (measured).
 - **Pending:** re-run on fully-real NASA-archive data → numbers will be refreshed honestly.
 

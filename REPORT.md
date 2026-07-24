@@ -23,30 +23,30 @@
 
 ## Final Test Metrics
 
-Evaluated on the held-out **disjoint** test set (250 images, 50 per class — none seen in training). Macro-averaged.
+Evaluated on the held-out **disjoint** test set (249 images, ~50 per class — none seen in training). Macro-averaged. All five classes trained on **real** telescope imagery (see `DATA_MANIFEST.json` below).
 
 | Metric | Standard | + TTA (6× aug) |
 |---|---|---|
-| **Accuracy** | **95.6%** | **96.4%** |
-| **Precision (macro)** | **0.958** | — |
-| **Recall (macro)** | **0.956** | — |
-| **F1 (macro)** | **0.956** | **0.964** |
+| **Accuracy** | **93.17%** | **92.77%** |
+| **Precision (macro)** | **0.934** | — |
+| **Recall (macro)** | **0.932** | — |
+| **F1 (macro)** | **0.932** | **0.928** |
 
 **Per-class F1 (Standard):**
 
 | Class | F1 |
 |---|---|
-| Spiral Galaxy | 0.884 |
+| Spiral Galaxy | 0.887 |
 | Elliptical Galaxy | 0.895 |
-| Nebula | 1.000 |
-| Star Cluster | 1.000 |
-| Planetary Object | 1.000 |
+| Nebula | 0.949 |
+| Star Cluster | 0.947 |
+| Planetary Object | 0.980 |
 
-*The high F1 on Nebula / Star Cluster / Planetary reflects that these classes are visually very distinct. The two **real** galaxy-morphology classes — Spiral vs Elliptical — show the realistic ~0.88–0.90 F1 that captures genuine morphological ambiguity, which is the residual error. TTA adds +0.8% accuracy. Note: these numbers predate the fully-real NASA Image Library source; a re-run with fully-real Nebula / Star Cluster / Planetary imagery (instead of the earlier procedural/Kaggle mix) may shift the per-class numbers for those three classes.*
+*The two real galaxy-morphology classes — Spiral vs Elliptical — show the realistic ~0.88–0.90 F1 that captures genuine morphological ambiguity, which is the residual error. Nebula / Star Cluster / Planetary, now also trained on real NASA imagery (no longer the earlier clean procedural/Kaggle mix), show realistic 0.95–0.98 F1 — the small drop from the earlier perfect 1.000 reflects the genuine visual variety of real telescope images. TTA is within noise of standard here (the real test set is harder and more varied than the earlier procedural one).*
 
-See `data/processed/DATA_MANIFEST.json` for the honest per-class source breakdown (which classes came from real Galaxy10 / NASA Image Library / Kaggle vs procedural fallback).
+See `data/processed/DATA_MANIFEST.json` for the honest per-class source breakdown (all five classes real: Galaxy10 DECaLS for the two galaxies, NASA Image Library for the other three).
 
-> **Reproducibility note:** the 95.6% / 96.4% numbers were produced on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` over a 50-epoch schedule on real Galaxy10 + deep-space imagery. The committed `data/processed/DATA_MANIFEST.json` records the actual per-class source of the current build. To reproduce with fully-real data (no API key), run `python src/prepare_data.py` — Galaxy10 supplies the galaxy classes and the **NASA Image Library** supplies Nebula / Star Cluster / Planetary — then `python src/train.py`. See [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
+> **Reproducibility note:** the 93.17% / 92.77% numbers were produced on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` over a 50-epoch schedule on **fully-real** imagery — Galaxy10 DECaLS for the two galaxy classes and the NASA Image Library (no API key) for Nebula / Star Cluster / Planetary. The committed `data/processed/DATA_MANIFEST.json` is the manifest from this real run. To reproduce: run the Colab notebook, or `python src/prepare_data.py` (downloads real data, no key needed) then `python src/train.py`. See [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
 ## Confusion Matrix
 
@@ -77,4 +77,4 @@ One-click alternative: open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_
 - **Full pipeline:** [`src/train.py`](src/train.py) — progressive unfreezing (backbone frozen epochs 1-3, full fine-tune from epoch 4) + OneCycleLR, AdamW (lr `3e-4`), batch 32, mixed precision (AMP), class weights, label smoothing.
 - **Config:** [`configs/config.yaml`](configs/config.yaml). Checkpoint: `checkpoints/best_model.pth`.
 
-> **Training note:** the reported model was trained to **95.6% / 96.4%** on a **CUDA GPU (Google Colab)** over a 50-epoch schedule via [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb). Inference runs comfortably on consumer hardware — measured ~72 ms/image on an Apple-MPS MacBook.
+> **Training note:** the reported model was trained to **93.17% / 92.77%** on a **CUDA GPU (Google Colab)** over a 50-epoch schedule via [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) on fully-real imagery (Galaxy10 DECaLS + NASA Image Library). Inference runs comfortably on consumer hardware — measured ~72 ms/image on an Apple-MPS MacBook.

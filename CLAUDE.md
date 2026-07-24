@@ -9,7 +9,7 @@
 - **Domain:** Computer Vision / ML / Astronomical Imaging
 - **Tech Stack:** Python, PyTorch, EfficientNet-B3, Albumentations, Streamlit, Grad-CAM
 - **Tier:** T1 (Standard)
-- **Final model:** EfficientNet-B3, **95.6% test accuracy / 96.4% TTA / 0.96 macro F1**
+- **Final model:** EfficientNet-B3, **93.17% test accuracy / 92.77% TTA / 0.93 macro F1** (fully-real imagery)
 
 ## Quick Commands
 

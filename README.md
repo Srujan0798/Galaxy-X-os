@@ -3,7 +3,7 @@
 **Sequence-Based Classification of Astronomical Objects Using Deep Learning**
 
 > Deep learning model for classifying raw astronomical images into 5 celestial categories.
-> **TechOIITGN Hackathon Submission** | **95.6% test accuracy (96.4% with TTA, 0.96 macro F1)** | **Grad-CAM explainability + Web Demo**
+> **TechOIITGN Hackathon Submission** | **93.17% test accuracy (92.77% with TTA, 0.93 macro F1)** on fully-real imagery | **Grad-CAM explainability + Web Demo**
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 95.6% test accuracy (96.4% with TTA) / 0.96 macro F1 on a held-out disjoint test set (250 images, MD5 leak-checked). Real Galaxy10 DECaLS survey imagery for the two galaxy classes + real NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (Kaggle + labelled procedural remain as fallbacks only) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application |
+| **Key Results** | 93.17% test accuracy (92.77% with TTA) / 0.932 macro F1 on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes trained on **real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application |
 
 ### 5-Class Taxonomy
 
@@ -110,7 +110,7 @@ Galaxy-X-os/
 
 | Component | Weight | Score | Evidence |
 |-----------|--------|-------|----------|
-| **Classification Performance** | 40% | — | 95.6% accuracy (96.4% with TTA), 0.956 macro F1 (0.964 TTA), confusion matrix, per-class F1, classification report |
+| **Classification Performance** | 40% | — | 93.17% accuracy (92.77% with TTA), 0.932 macro F1 (0.928 TTA), confusion matrix, per-class F1, classification report |
 | **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), measured ~72 ms/image (median) on Apple MPS |
 | **Explainability & Visualization** | 15% | — | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
 | **Innovation / Bonus Features** | 15% | — | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |

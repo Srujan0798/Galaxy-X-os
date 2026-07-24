@@ -23,7 +23,7 @@ Classes: Spiral Galaxy · Elliptical Galaxy · Nebula · Star Cluster · Planeta
 
 | # | Criterion | Weight | Where in repo |
 |---|-----------|--------|---------------|
-| 1 | **Classification Performance** | 40% | `REPORT.md` (Final Test Metrics: **95.6% std / 96.4% TTA**, macro-F1 0.956 / 0.964); `results/evaluation_results.json`; `results/confusion_matrix.png`; `results/per_class_metrics.png`; eval code `src/evaluate.py` |
+| 1 | **Classification Performance** | 40% | `REPORT.md` (Final Test Metrics: **93.17% std / 92.77% TTA**, macro-F1 0.932 / 0.928); `results/evaluation_results.json`; `results/confusion_matrix.png`; `results/per_class_metrics.png`; eval code `src/evaluate.py` |
 | 2 | **Model Efficiency** | 15% | EfficientNet-B3 (~11.6M params) — `src/model.py`; mixed-precision + progressive unfreezing in `src/train.py`; inference time in `REPORT.md`; TTA in `src/evaluate.py` |
 | 3 | **Explainability & Visualization** | 15% | Grad-CAM module `src/gradcam.py`; output images in `results/gradcam/` (15 per-sample 3-panel figures + `_summary_grid.png`); confidence distribution `results/confidence_distribution.png` |
 | 4 | **Innovation / Bonus** | 15% | Astro-specific augmentations (cosmic-ray sim, vignetting, Poisson noise) `src/augmentations.py`; TTA (6× aug) in `src/evaluate.py`; bonus features `src/bonus.py`; real-first data pipeline `src/prepare_data.py` with honest procedural fallback (`data/processed/DATA_MANIFEST.json`); Streamlit demo `app/app.py` |
@@ -39,7 +39,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 |---|---------------|----------|
 | 1 | **Dataset Sources** | `REPORT.md` → *Dataset Sources* (real Galaxy10 DECaLS survey imagery for Spiral + Elliptical; real NASA Image Library imagery (images.nasa.gov, no API key) for Nebula / Star Cluster / Planetary with per-class purity filtering, Kaggle + labelled procedural as fallbacks only; disjoint stratified split, MD5 leakage check, honest `DATA_MANIFEST.json`) |
 | 2 | **Model Architecture** | `REPORT.md` → *Model Architecture* (EfficientNet-B3, transfer learning, AdamW, OneCycleLR); code in `src/model.py` |
-| 3 | **Final Test Metrics (Acc / Precision / Recall / F1)** | `REPORT.md` → *Final Test Metrics* (**95.6% std, 96.4% TTA**, macro-F1 0.956 / 0.964, per-class F1); raw numbers `results/evaluation_results.json` |
+| 3 | **Final Test Metrics (Acc / Precision / Recall / F1)** | `REPORT.md` → *Final Test Metrics* (**93.17% std, 92.77% TTA**, macro-F1 0.932 / 0.928, per-class F1); raw numbers `results/evaluation_results.json` |
 | 4 | **Confusion Matrix** | `REPORT.md` → *Confusion Matrix* references `results/confusion_matrix.png` (+ `results/per_class_metrics.png`) |
 | 5 | **Inference Time** | `REPORT.md` → *Inference Time* |
 | 6 | **Setup Instructions** | `REPORT.md` → *Setup Instructions* (env create + install + train/eval/gradcam/app commands); also `HOW_TO_RUN.md`, `README.md` |
@@ -49,7 +49,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 ## Grad-CAM Outputs Present (`results/gradcam/`)
 
-15 per-sample 3-panel figures, `sample_01..15_*.png` (from the final 95.6%-accuracy run), plus `_summary_grid.png`. Includes both correct and incorrect predictions so reviewers can see where the model actually looks.
+15 per-sample 3-panel figures, `sample_01..15_*.png` (from the final 93.17%-accuracy run on fully-real imagery), plus `_summary_grid.png`. Includes both correct and incorrect predictions so reviewers can see where the model actually looks.
 
 ---
 
@@ -67,6 +67,6 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 **Honest note on training**
 - Final model was trained on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` — full EfficientNet-B3 fine-tune, 250-image held-out test set.
-- Final honest test result: **95.6% accuracy (96.4% with TTA)**, macro-F1 **0.956 / 0.964**.
+- Final honest test result: **93.17% accuracy (92.77% with TTA)**, macro-F1 **0.932 / 0.928**.
 - Residual confusion is between Spiral and Elliptical Galaxy (visually similar morphologies), surfaced openly in the report and Grad-CAM figures.
 - The trained weights (`checkpoints/best_model.pth`, ~141 MB) exceed GitHub's 100 MB file limit, so they are **not** committed. Guaranteed path: reproduce them via `python src/prepare_data.py` → `python src/train.py` (or the one-click `notebooks/Galaxy_X_Colab.ipynb`). If published, they are also attached to the [v1.0 Release](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0).
