@@ -172,7 +172,8 @@ def select_diverse_samples(dataset: AstroDataset, num_total: int = 15, min_per_c
         selected.extend([(p, class_idx) for p in picks])
         budget -= len(picks)
 
-    remaining = [(i, l) for i, l in enumerate(dataset.labels) if (i, l) not in selected]
+    selected_set = set(selected)
+    remaining = [(i, lbl) for i, lbl in enumerate(dataset.labels) if (i, lbl) not in selected_set]
     if remaining and budget > 0:
         selected.extend(random.sample(remaining, min(budget, len(remaining))))
     random.shuffle(selected)
@@ -189,7 +190,8 @@ def visualize_predictions(
 ):
     """Generate 3-panel Grad-CAM figures for diverse test samples."""
     if not GRADCAM_AVAILABLE:
-        logger.error("pip install grad-cam"); return []
+        logger.error("pip install grad-cam")
+        return []
 
     os.makedirs(output_dir, exist_ok=True)
     samples = select_diverse_samples(dataset, num_total=num_samples, min_per_class=3)

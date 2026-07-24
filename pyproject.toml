@@ -16,6 +16,20 @@ classifiers = [
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint.per-file-ignores]
+# These files prepend their own dir to sys.path before importing siblings;
+# E402 (import not at top) is inherent and intentional here.
+"src/evaluate.py" = ["E402"]
+"src/gradcam.py" = ["E402"]
+"src/inference.py" = ["E402"]
+"src/train.py" = ["E402"]
+"src/train_head.py" = ["E402"]
+"src/validate_dataset.py" = ["E402"]
+"src/prepare_data.py" = ["E402"]
+"src/generate_from_real_data.py" = ["E741"]
+"app/app.py" = ["E402"]
+"src/download_archives.py" = ["E402"]
+
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true

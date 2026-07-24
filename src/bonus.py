@@ -391,21 +391,104 @@ class AnomalyDetector:
 
 
 # ===========================================================================
-# Convenience pipeline: classify + caption + anomaly verdict
+# Bonus 2: Object Localization (Grad-CAM-thresholded pseudo-bounding-box)
 # ===========================================================================
+
+def localize_object(
+    cam_heatmap: "np.ndarray",
+    threshold: float = 0.30,
+) -> Dict:
+    """
+    Derive a pseudo-bounding box from a Grad-CAM heatmap.
+
+    Grad-CAM highlights *where the model looked*. We threshold the normalized
+    heatmap and take the tightest bounding box of the resulting binary mask.
+    This is NOT a learned detector (no YOLO/Mask R-CNN) -- it is a cheap,
+    explainable saliency-localizer that re-uses the classifier's Grad-CAM, which
+    the problem statement permits as a weak-form localization under
+    "attention or Grad-CAM visualizations" (Bonus Task 4) and is offered here as
+    an honest partial answer to Bonus Task 2 (Object Localization).
+
+    Args:
+        cam_heatmap: 2-D Grad-CAM heatmap (values in [0, 1] or raw).
+        threshold: fraction of the max activation to keep (0.0-1.0).
+
+    Returns:
+        {
+          "bbox": [x_min, y_min, x_max, y_max] in pixel coords of the heatmap,
+          "bbox_frac": same as fractions of width/height (0-1),
+          "area_frac": fraction of the image covered by the box,
+          "threshold": float,
+          "mask_area_px": int,   # how many pixels exceeded threshold,
+          "method": "gradcam-threshold",
+        }
+        If no pixels exceed the threshold, bbox is None and area_frac is 0.
+    """
+    arr = np.asarray(cam_heatmap, dtype=np.float32)
+    if arr.ndim != 2:
+        arr = arr.squeeze()
+    if arr.ndim != 2:
+        raise ValueError(f"cam_heatmap must be 2-D, got shape {arr.shape}")
+
+    mx = float(arr.max())
+    if mx <= 0:
+        return {"bbox": None, "bbox_frac": None, "area_frac": 0.0,
+                "threshold": threshold, "mask_area_px": 0,
+                "method": "gradcam-threshold"}
+
+    mask = arr >= (threshold * mx)
+    mask_area_px = int(mask.sum())
+    h, w = arr.shape
+    if mask_area_px == 0:
+        return {"bbox": None, "bbox_frac": None, "area_frac": 0.0,
+                "threshold": threshold, "mask_area_px": 0,
+                "method": "gradcam-threshold"}
+
+    rows = np.any(mask, axis=1)
+    cols = np.any(mask, axis=0)
+    y_min, y_max = int(np.argmax(rows)), int(len(rows) - 1 - np.argmax(rows[::-1]))
+    x_min, x_max = int(np.argmax(cols)), int(len(cols) - 1 - np.argmax(cols[::-1]))
+
+    bbox = [x_min, y_min, x_max, y_max]
+    bbox_frac = [x_min / w, y_min / h, x_max / w, y_max / h]
+    box_area = max(0, (x_max - x_min)) * max(0, (y_max - y_min))
+    area_frac = float(box_area) / float(w * h)
+    return {"bbox": bbox, "bbox_frac": bbox_frac, "area_frac": area_frac,
+            "threshold": threshold, "mask_area_px": mask_area_px,
+            "method": "gradcam-threshold"}
+
+
+def render_localization_overlay(
+    image: "np.ndarray",
+    cam_heatmap: "np.ndarray",
+    bbox: list,
+    color=(0, 255, 0),
+    thickness: int = 3,
+) -> "np.ndarray":
+    """Draw the localization bbox on a copy of `image` (resized to the heatmap)."""
+    import cv2
+    img = np.array(image)
+    if img.dtype != np.uint8:
+        img = (np.clip(img, 0, 1) * 255).astype(np.uint8)
+    h, w = cam_heatmap.shape[:2]
+    if img.shape[:2] != (h, w):
+        img = cv2.resize(img, (w, h))
+    x1, y1, x2, y2 = bbox
+    return cv2.rectangle(img.copy(), (x1, y1), (x2, y2), color, thickness)
 
 def analyze_image_with_bonus(
     image_path: str,
     checkpoint_path: str = "checkpoints/best_model.pth",
     generate_caption_flag: bool = True,
     detect_anomalies: bool = True,
+    localize: bool = True,
     use_blip: bool = False,
 ) -> Dict:
     """
-    Full analysis pipeline: classify -> caption -> anomaly/OOD verdict.
+    Full analysis pipeline: classify -> caption -> localization -> anomaly/OOD verdict.
 
-    Requires a trained checkpoint (imports inference lazily so that the
-    caption/anomaly helpers above stay importable without torch/checkpoint).
+    Requires a trained checkpoint (imports inference/gradcam lazily so that the
+    caption/anomaly/localization helpers above stay importable without torch).
     """
     from inference import predict_image  # lazy: avoids torch import for helpers
 
@@ -417,10 +500,54 @@ def analyze_image_with_bonus(
             image_path, result.class_name, confidence=result.confidence, use_blip=use_blip
         )
 
+    if localize:
+        try:
+            from gradcam import explain_image  # lazy: heavy torch import
+            from utils import get_device
+            cam_result = explain_image(
+                model=_load_model_for_bonus(checkpoint_path),
+                image_path=image_path, device=get_device(),
+                true_label=result.class_index,
+            )
+            output["localization"] = localize_object(
+                _cam_array_from_overlay(cam_result["predicted_cam"])
+            )
+        except Exception as e:  # pragma: no cover - defensive; never fail the pipeline
+            output["localization"] = {"error": f"localization unavailable: {e}"}
+
     if detect_anomalies:
         output["anomaly"] = detect_anomaly(result.all_probabilities)
 
     return output
+
+
+def _load_model_for_bonus(checkpoint_path: str):
+    """Lazy model loader for localization (cached on second call)."""
+    from gradcam import load_model_for_gradcam
+    from utils import get_device
+    if not hasattr(_load_model_for_bonus, "_cache"):
+        _load_model_for_bonus._cache = {}
+    if checkpoint_path not in _load_model_for_bonus._cache:
+        _load_model_for_bonus._cache[checkpoint_path] = load_model_for_gradcam(
+            checkpoint_path, get_device()
+        )
+    return _load_model_for_bonus._cache[checkpoint_path]
+
+
+def _cam_array_from_overlay(overlay: "np.ndarray") -> "np.ndarray":
+    """Best-effort recover a 2-D activation map from a CAM overlay image.
+
+    Overlays are RGB; we take the max over channels as a proxy for activation
+    intensity. For exact heatmaps, call `localize_object` directly with the
+    raw Grad-CAM array from `gradcam.generate_cam`.
+    """
+    arr = np.asarray(overlay, dtype=np.float32)
+    if arr.ndim == 3:
+        arr = arr.max(axis=2)
+    mx = float(arr.max())
+    if mx > 0:
+        arr = arr / mx
+    return arr
 
 
 # ===========================================================================
@@ -432,7 +559,7 @@ def _main() -> int:
     import os
 
     parser = argparse.ArgumentParser(
-        description="SCALE x ODYSSEY -- Bonus features (offline caption + OOD detection)"
+        description="SCALE x ODYSSEY -- Bonus features (caption + localization + OOD)"
     )
     parser.add_argument("--image", required=True, help="Path to an astronomical image")
     parser.add_argument("--checkpoint", default="checkpoints/best_model.pth",
@@ -441,6 +568,8 @@ def _main() -> int:
                         help="Opt in to neural BLIP caption (may download weights)")
     parser.add_argument("--no-caption", action="store_true", help="Skip caption generation")
     parser.add_argument("--no-anomaly", action="store_true", help="Skip anomaly detection")
+    parser.add_argument("--no-localize", action="store_true",
+                        help="Skip object localization (Grad-CAM pseudo-bbox)")
     args = parser.parse_args()
 
     print("=" * 60)
@@ -463,6 +592,7 @@ def _main() -> int:
             args.checkpoint,
             generate_caption_flag=not args.no_caption,
             detect_anomalies=not args.no_anomaly,
+            localize=not args.no_localize,
             use_blip=args.use_blip,
         )
     except Exception as e:  # pragma: no cover - CLI safety net
@@ -478,6 +608,18 @@ def _main() -> int:
         cap = result["caption"]
         print(f"\nCaption ({cap.get('method', 'N/A')}):")
         print(f"  {cap['caption']}")
+
+    if "localization" in result and isinstance(result["localization"], dict):
+        loc = result["localization"]
+        if loc.get("bbox") is not None:
+            print("\nObject Localization (Grad-CAM pseudo-bbox):")
+            print(f"  bbox (px): {loc['bbox']}")
+            print(f"  area covered: {loc['area_frac']:.1%} | threshold: {loc['threshold']:.2f} "
+                  f"| mask px: {loc['mask_area_px']}")
+        elif "error" in loc:
+            print(f"\nObject Localization: {loc['error']}")
+        else:
+            print("\nObject Localization: no salient region above threshold.")
 
     if "anomaly" in result:
         anom = result["anomaly"]

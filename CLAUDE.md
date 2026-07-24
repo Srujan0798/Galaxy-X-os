@@ -38,7 +38,7 @@ Raw Images → Preprocess → AstroDataset → EfficientNet-B3 → 5-Class Outpu
 
 | Path | Purpose |
 |------|---------|
-| `src/` | Source code (prepare_data, train, evaluate, gradcam, inference, bonus, model, dataset, utils, augmentations, preprocess) |
+| `src/` | Source code (prepare_data, train, evaluate, gradcam, inference, bonus, model, dataset, utils) |
 | `app/` | Streamlit web demo |
 | `notebooks/` | `Galaxy_X_Colab.ipynb` — one-click Colab pipeline |
 | `configs/` | `config.yaml` — single source of truth |

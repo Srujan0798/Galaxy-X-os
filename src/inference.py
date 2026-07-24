@@ -216,7 +216,8 @@ if __name__ == "__main__":
     elif image_path.is_dir():
         files = [str(f) for f in image_path.glob("*") if f.suffix.lower() in (".jpg", ".jpeg", ".png")]
         if not files:
-            logger.error("No images found"); exit(1)
+            logger.error("No images found")
+            raise SystemExit(1)
         results = predict_batch(files, args.checkpoint, args.device, args.batch_size)
         print(f"\n{'='*60}\n{'Image':<30s} {'Prediction':<20s} {'Conf':>8s}\n{'-'*60}")
         for p, r in zip(files, results):

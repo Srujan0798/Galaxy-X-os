@@ -1,4 +1,3 @@
-import pytest
 from src.utils import load_config, set_seed, compute_metrics
 
 

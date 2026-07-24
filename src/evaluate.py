@@ -91,12 +91,12 @@ class TTADataset(Dataset):
         return self.tta_transform(image=img)["image"], self.base_dataset.labels[idx]
 
 
-def evaluate_tta(model, test_dataset, device, batch_size=32, num_workers=4):
+def evaluate_tta(model, test_dataset, device, batch_size=32, num_workers=4, image_size=224):
     """Batched Test-Time Augmentation with 6 variants."""
     import albumentations as A
     from albumentations.pytorch import ToTensorV2
 
-    base = [A.Resize(224, 224), A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), ToTensorV2()]
+    base = [A.Resize(image_size, image_size), A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), ToTensorV2()]
 
     tta_transforms = [
         A.Compose(base),
@@ -234,7 +234,8 @@ def main():
     logger.info("=" * 60)
     tta_results = evaluate_tta(model, test_dataset, device,
                                 config["training"].get("batch_size", 32),
-                                config["data"].get("num_workers", 4))
+                                config["data"].get("num_workers", 4),
+                                config["data"]["image_size"])
 
     # Save
     from sklearn.metrics import precision_score, recall_score

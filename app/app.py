@@ -11,11 +11,10 @@ Matches official guide (page 17) with our beautiful UI:
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
-import numpy as np
 import torch
-from PIL import Image
 import streamlit as st
 
 # ---------------------------------------------------------------------------
@@ -226,9 +225,13 @@ def main():
                                 type=["jpg", "jpeg", "png"])
 
     if uploaded is not None:
-        temp_path = f"/tmp/{uploaded.name}"
-        with open(temp_path, "wb") as f:
-            f.write(uploaded.getbuffer())
+        # Use a sanitized temp file to prevent path traversal via uploaded.name.
+        suffix = Path(uploaded.name).suffix.lower()
+        if suffix not in (".jpg", ".jpeg", ".png"):
+            suffix = ".png"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp.write(uploaded.getbuffer())
+            temp_path = tmp.name
 
         left, right = st.columns([1, 1])
         with left:
