@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 95.6% test accuracy (96.4% with TTA) / 0.96 macro F1 on real SDSS DR17 + merged Kaggle galaxy data (verified disjoint split, no leakage), professional Grad-CAM visualizations, interactive web application |
+| **Key Results** | 95.6% test accuracy (96.4% with TTA) / 0.96 macro F1 on a held-out disjoint test set (250 images, MD5 leak-checked). Real Galaxy10 DECaLS survey imagery for the two galaxy classes + Kaggle deep-space sets (with labelled procedural fallback) for the rest — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application |
 
 ### 5-Class Taxonomy
 
@@ -30,15 +30,13 @@
 ## Quick Start
 
 ```bash
-# 1. Setup environment
-conda create -n scale_odyssey python=3.10 -y
-conda activate scale_odyssey
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Prepare data
-python src/download_datasets.py
+# 2. Prepare data (downloads real data + writes DATA_MANIFEST.json)
+python src/prepare_data.py
 
-# 3. Train
+# 3. Train (full EfficientNet-B3 fine-tune)
 python src/train.py
 
 # 4. Evaluate (standard + TTA)
@@ -56,6 +54,10 @@ python src/bonus.py data/processed/test/spiral_galaxy/sample.jpg
 # 8. Launch web demo (record for submission!)
 streamlit run app/app.py
 ```
+
+> **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
+>
+> **Trained weights:** the trained `best_model.pth` (~141 MB) exceeds GitHub's 100 MB file limit, so it is published as a GitHub Release asset — download it from https://github.com/Srujan0798/Galaxy-X-os/releases/latest and drop it in `checkpoints/`. You can also reproduce it via steps 2–3 above.
 
 ---
 
@@ -76,8 +78,8 @@ Galaxy-X-os/
 │   ├── model.py                     # EfficientNet-B3 + custom head + Grad-CAM hooks
 │   ├── utils.py                     # Helpers (device, seed, config, metrics, logging)
 │   ├── generate_splits.py           # Stratified DISJOINT train/val/test split
+│   ├── prepare_data.py              # Download real data + build splits + DATA_MANIFEST.json
 │   ├── train.py                     # Full pipeline: progressive unfreezing + OneCycleLR
-│   ├── train_head.py                # Memory-safe head-only trainer (8 GB machines)
 │   ├── evaluate.py                  # Metrics (Acc/Prec/Rec/F1) + TTA + confusion matrix
 │   ├── gradcam.py                   # explain_image() + 15-sample 3-panel visualization
 │   ├── inference.py                 # Fast single/batch inference + ModelManager
@@ -86,8 +88,8 @@ Galaxy-X-os/
 │   └── app.py                       # Streamlit interactive web demo
 ├── notebooks/                       # 01_EDA, 02_Training, 03_Evaluation
 ├── data/
-│   ├── raw/                         # Source datasets (SDSS DR17 + Kaggle)
-│   └── processed/                   # Disjoint 5-class split: 1600 train / 200 val / 200 test
+│   ├── raw/                         # Source datasets (Galaxy10 DECaLS + Kaggle deep-space)
+│   └── processed/                   # Disjoint 5-class split + DATA_MANIFEST.json
 ├── checkpoints/                     # Trained weights (best_model.pth, gitignored)
 ├── results/                         # confusion_matrix.png, gradcam/, evaluation_results.json
 ├── docs/                            # ADRs, runbooks, presentation/
@@ -101,8 +103,8 @@ Galaxy-X-os/
 
 | Component | Weight | Score | Evidence |
 |-----------|--------|-------|----------|
-| **Classification Performance** | 40% | — | 72.0% accuracy (74.5% with TTA), 0.71 macro F1, confusion matrix, per-class F1, classification report |
-| **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), few-hundred-ms inference per image on Apple MPS |
+| **Classification Performance** | 40% | — | 95.6% accuracy (96.4% with TTA), 0.956 macro F1 (0.964 TTA), confusion matrix, per-class F1, classification report |
+| **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), measured ~72 ms/image (median) on Apple MPS |
 | **Explainability & Visualization** | 15% | — | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
 | **Innovation / Bonus Features** | 15% | — | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |
 | **Documentation & Presentation** | 15% | — | Full README, modular code, 3 Jupyter notebooks, reproducible configs, demo video |
@@ -112,11 +114,11 @@ Galaxy-X-os/
 ## Phase 1: Data Pipeline
 
 ```bash
-python src/download_datasets.py
+python src/prepare_data.py
 ```
 
-- Multi-source data: SDSS DR17 + merged Kaggle galaxy datasets
-- Balanced **disjoint** splits: 1600 train / 200 val / 200 test (verified by MD5 — no image in >1 split)
+- Multi-source data: real Galaxy10 DECaLS survey imagery (Spiral + Elliptical) + Kaggle deep-space sets for Nebula / Star Cluster / Planetary, with a clearly-labelled procedural fallback. See `data/processed/DATA_MANIFEST.json` for the authoritative per-class real-vs-fallback record.
+- Balanced **disjoint** splits (verified by MD5 — no image in >1 split)
 - Class imbalance handling (oversampling + weighted loss)
 - Quality filtering (corrupted image removal)
 - 8 astronomy-specific augmentation transforms (cosmic ray simulation, vignetting, Poisson noise)
@@ -159,7 +161,7 @@ python src/train.py
 | `model.backbone` | `efficientnet_b3` | Options: `efficientnet_b3`, `efficientnet_b4`, `resnet50` |
 | `training.num_epochs` | 50 | Increase to 100 for final run |
 | `training.lr` | 3e-4 | OneCycleLR max learning rate |
-| `training.batch_size` | 32 | Reduce to 16 if OOM (memory-bound on 8GB; full backbone fine-tune needs >12GB) |
+| `training.batch_size` | 32 | Reduce to 16 if you hit GPU OOM on a smaller card |
 | `training.patience` | 12 | Early stopping patience |
 | `training.mixed_precision` | true | Disable if instability |
 | `training.freeze_backbone_epochs` | 3 | Progressive unfreezing duration |
@@ -196,7 +198,7 @@ python src/inference.py path/to/images/ --batch-size 16
 - Single + batch prediction with **automatic mixed precision**
 - Returns: class name, confidence, full probability distribution, inference time
 
-**Measured**: roughly a few hundred ms per image on Apple MPS (8GB MacBook Air). Faster (~tens of ms) expected on a CUDA GPU.
+**Measured**: ~72 ms per image (median; 118 ms mean) on Apple MPS after warmup — well under the 5 s requirement. Faster on a CUDA GPU.
 
 ### Interactive Web Demo
 
