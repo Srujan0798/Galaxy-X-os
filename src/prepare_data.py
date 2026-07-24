@@ -227,6 +227,16 @@ def kaggle_credentials_present() -> bool:
     return bool(os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"))
 
 
+def _safe_extract_zip(z: "zipfile.ZipFile", dest: Path) -> None:
+    """Extract a zip while rejecting entries that escape ``dest`` (zip-slip guard)."""
+    dest = dest.resolve()
+    for member in z.namelist():
+        target = (dest / member).resolve()
+        if not str(target).startswith(str(dest) + os.sep) and target != dest:
+            raise ValueError(f"Blocked zip-slip path traversal in archive: {member!r}")
+    z.extractall(dest)
+
+
 def _download_kaggle_dataset(ref: str) -> Optional[Path]:
     """Download a Kaggle dataset via kagglehub (preferred) or the kaggle CLI."""
     # kagglehub returns a cached local path -- ideal and idempotent.
@@ -255,7 +265,7 @@ def _download_kaggle_dataset(ref: str) -> Optional[Path]:
             return None
         for zf in dest.glob("*.zip"):
             with zipfile.ZipFile(zf) as z:
-                z.extractall(dest)
+                _safe_extract_zip(z, dest)
             zf.unlink()
         return dest
     except FileNotFoundError:
