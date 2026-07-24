@@ -78,3 +78,7 @@ attic/
 data/processed/
 data/processed_leaky_backup/
 data/raw/
+
+# Colab download artifact (contains the 141MB checkpoint)
+results.zip
+*.zip

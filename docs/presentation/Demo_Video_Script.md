@@ -61,7 +61,7 @@ python src/inference.py data/processed/test/ --batch-size 16
 Show the rapid output with filenames, predictions, and confidence scores scrolling by.
 
 **Narration**:
-"Our inference engine processes a batch of test images quickly -- a few hundred milliseconds per image on this MacBook Air's Apple MPS, and faster still on a CUDA GPU. Here's a batch of 16 test images classified in one pass."
+"Our inference engine processes a batch of test images in well under the 5-second-per-image requirement -- about 72 milliseconds median on this MacBook Air's Apple MPS, and faster still on a CUDA GPU. Here's a batch of 16 test images classified in one pass."
 
 ---
 
@@ -88,7 +88,7 @@ cat results/evaluation_results.json
 Show the accuracy numbers, per-class F1 scores, and TTA improvement.
 
 **Narration**:
-"On the test set, our model achieves 72.4% accuracy with standard evaluation and 74.4% with test-time augmentation, for a macro F1 around 0.72. Elliptical Galaxy and Nebula classify near-perfectly; the spiral, star-cluster, and planetary classes are harder because they share visually similar diffuse structures."
+"On the held-out test set, our model achieves 95.6% accuracy with standard evaluation and 96.4% with test-time augmentation, for a macro F1 of 0.96. Nebula, Star Cluster, and Planetary classify perfectly; the residual confusion is between Spiral and Elliptical galaxies, which share genuinely similar morphologies."
 
 ---
 

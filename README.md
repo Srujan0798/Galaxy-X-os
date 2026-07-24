@@ -211,6 +211,8 @@ streamlit run app/app.py
 - Real-time prediction with confidence score
 - Full probability distribution bar chart
 - **Grad-CAM heatmap overlay** with explanation
+- **Offline template caption** for the predicted class (BLIP with automatic template fallback)
+- **Softmax-entropy anomaly / OOD flag** (low-confidence + top-2 gap + entropy)
 - GPU/CPU info sidebar
 - Cached model loading for instant response
 
@@ -232,7 +234,7 @@ print(result["caption"])
 - **Automatic fallback** to template captions if BLIP unavailable
 - Templates tailored per astronomical class
 
-### Bonus 2: Anomaly Detection
+### Bonus 2: Anomaly / OOD Detection (softmax entropy)
 
 ```python
 from src.bonus import AnomalyDetector

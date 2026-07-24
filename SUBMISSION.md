@@ -37,7 +37,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 | # | Required item | Location |
 |---|---------------|----------|
-| 1 | **Dataset Sources** | `REPORT.md` → *Dataset Sources* (SDSS DR17 + merged Kaggle galaxy-morphology sets; 80/10/10 stratified split, MD5 leakage check, honest `DATA_MANIFEST.json`) |
+| 1 | **Dataset Sources** | `REPORT.md` → *Dataset Sources* (real Galaxy10 DECaLS survey imagery for Spiral + Elliptical; Kaggle deep-space sets for Nebula / Star Cluster / Planetary with labelled procedural fallback; disjoint stratified split, MD5 leakage check, honest `DATA_MANIFEST.json`) |
 | 2 | **Model Architecture** | `REPORT.md` → *Model Architecture* (EfficientNet-B3, transfer learning, AdamW, OneCycleLR); code in `src/model.py` |
 | 3 | **Final Test Metrics (Acc / Precision / Recall / F1)** | `REPORT.md` → *Final Test Metrics* (**95.6% std, 96.4% TTA**, macro-F1 0.956 / 0.964, per-class F1); raw numbers `results/evaluation_results.json` |
 | 4 | **Confusion Matrix** | `REPORT.md` → *Confusion Matrix* references `results/confusion_matrix.png` (+ `results/per_class_metrics.png`) |
@@ -57,9 +57,9 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 **Done**
 - End-to-end pipeline: data prep → train → evaluate (+TTA) → Grad-CAM → Streamlit demo.
-- Real data sources (SDSS DR17 via Galaxy10, Kaggle deep-space images) with clearly-labelled procedural fallback so the pipeline never breaks.
+- Real data sources: Galaxy10 DECaLS survey imagery (via astroNN) for Spiral + Elliptical; Kaggle deep-space images (`fedesoriano/deep-space-images`, `brsdincer/planetary-solar-system-objects`) for Nebula / Star Cluster / Planetary, with clearly-labelled procedural fallback so the pipeline never breaks.
 - Honest per-class source record in `data/processed/DATA_MANIFEST.json` (rebuilt by `python src/prepare_data.py`).
-- Disjoint 80/10/10 stratified split, verified by MD5 hash that no image appears in >1 split.
+- Disjoint stratified split, verified by MD5 hash that no image appears in >1 split.
 - Full one-page report with all 7 required items, exported to PDF.
 - 15 Grad-CAM figures + summary grid committed under `results/gradcam/`.
 - Device selection is portable: `get_device()` in `src/utils.py` prefers **CUDA > MPS > CPU**, and `src/gradcam.py` uses it — so the same code runs on a grader's GPU box or this MacBook.
@@ -68,4 +68,4 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 - Final model was trained on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` — full EfficientNet-B3 fine-tune, 250-image held-out test set.
 - Final honest test result: **95.6% accuracy (96.4% with TTA)**, macro-F1 **0.956 / 0.964**.
 - Residual confusion is between Spiral and Elliptical Galaxy (visually similar morphologies), surfaced openly in the report and Grad-CAM figures.
-- The 134 MB `checkpoints/best_model.pth` is kept locally and reproducible via `python src/train.py` (gitignored — too large for the repo).
+- The trained weights (`checkpoints/best_model.pth`, ~141 MB) exceed GitHub's 100 MB file limit, so they are published as a GitHub Release asset: https://github.com/Srujan0798/Galaxy-X-os/releases/latest. Also fully reproducible via `python src/prepare_data.py` → `python src/train.py`.

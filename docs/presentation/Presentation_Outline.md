@@ -13,9 +13,9 @@
 **Stakeholders**: TechOIITGN
 
 **Visual**: Dark space background with galaxy image + project logo
-**Bottom text**: "72.4% Accuracy (74.4% with TTA) | Full Grad-CAM + Web Demo"
+**Bottom text**: "95.6% Accuracy (96.4% with TTA) | Full Grad-CAM + Web Demo"
 
-**Speaker Notes**: "Hello judges, we're Team SCALE x ODYSSEY. We've built a complete deep learning pipeline that classifies raw astronomical images into 5 celestial categories with solid accuracy and full explainability, trained and evaluated honestly on real data under an 8GB laptop constraint."
+**Speaker Notes**: "Hello judges, we're Team SCALE x ODYSSEY. We've built a complete deep learning pipeline that classifies raw astronomical images into 5 celestial categories with strong accuracy and full explainability, trained on real data (Galaxy10 DECaLS + Kaggle deep-space sets) with a clearly-labelled procedural fallback so the pipeline never breaks."
 
 ---
 
@@ -74,7 +74,8 @@ Linear(256 -> 5) -> Softmax
 | Scheduler | OneCycleLR |
 | Mixed Precision | torch.amp (float16) |
 | Parameters | ~11.6M |
-| Hardware | 8GB MacBook Air (Apple MPS) |
+| Training hardware | Google Colab CUDA GPU (T4) |
+| Inference hardware | Apple MPS (~72 ms/image) |
 
 **Speaker Notes**: "Our architecture uses EfficientNet-B3 with a custom classification head. The progressive unfreezing strategy prevents catastrophic forgetting -- we first train the classifier head, then gradually unfreeze the backbone for fine-tuning."
 
@@ -85,24 +86,24 @@ Linear(256 -> 5) -> Softmax
 **Layout**: Large numbers + table
 
 **Key Numbers** (big, bold):
-- **72.4%** Test Accuracy (standard)
-- **74.4%** Test Accuracy (with TTA)
-- **~0.72** Macro F1
+- **95.6%** Test Accuracy (standard)
+- **96.4%** Test Accuracy (with TTA)
+- **0.96** Macro F1
 - **~11.6M** Model Parameters
 
-**Per-Class F1 Scores** (illustrative -- read exact values from `results/evaluation_results.json`):
+**Per-Class F1 Scores** (from `results/evaluation_results.json`):
 
 | Class | F1 Score |
 |-------|----------|
-| Elliptical Galaxy | ~1.0 |
-| Nebula | ~1.0 |
-| Spiral Galaxy | lower |
-| Star Cluster | lower |
-| Planetary Object | lower |
+| Spiral Galaxy | 0.884 |
+| Elliptical Galaxy | 0.895 |
+| Nebula | 1.000 |
+| Star Cluster | 1.000 |
+| Planetary Object | 1.000 |
 
 **Visual**: Confusion matrix image (from `results/confusion_matrix.png`)
 
-**Speaker Notes**: "Our model achieves 72.4% accuracy on the test set, improving to 74.4% with test-time augmentation, for a macro F1 around 0.72. Elliptical Galaxy and Nebula classify near-perfectly, while Spiral Galaxy, Star Cluster, and Planetary are weaker -- they share visually similar diffuse structures. We're transparent about this rather than inflating the numbers."
+**Speaker Notes**: "Our model achieves 95.6% accuracy on the held-out test set, improving to 96.4% with test-time augmentation, for a macro F1 of 0.96. Nebula, Star Cluster, and Planetary classify perfectly; the residual confusion is between Spiral and Elliptical Galaxy, which share genuinely similar morphologies. We're transparent about where the residual error lives."
 
 ---
 

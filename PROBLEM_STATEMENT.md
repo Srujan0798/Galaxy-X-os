@@ -5,6 +5,17 @@
 > Source images: `untitled folder/Screenshot 2026-05-27 ...` (12) and `resourses/Screenshot 2026-05-31 ...` (8) — both contain identical content. Safe to delete the images now; this file preserves their text.
 > **Stakeholders:** Janil Jain, Jaskirat Singh Maskeen, Priyal Keswani
 
+### Additional Real-Data Resources
+
+Curated public sources for real astronomical imagery (beyond what `src/prepare_data.py` already pulls):
+
+* **Galaxy Zoo** — https://data.galaxyzoo.org — citizen-science-labelled galaxy morphology (spiral / elliptical ground truth)
+* **SDSS** — https://www.sdss.org — Sloan Digital Sky Survey (deep multi-band sky imaging; basis of Galaxy10 / DECaLS)
+* **ESA Hubble** — https://esahubble.org/projects/fits_liberator/datasets/ — Hubble FITS-liberator datasets
+* **NASA Hubble** — https://science.nasa.gov/mission/hubble/ — mission page + data portal
+* **NASA PDS** — https://pds.nasa.gov — Planetary Data System (planetary mission archives)
+* **ESA PSA** — https://archives.esac.esa.int/psa/ — Planetary Science Archive
+
 ---
 
 ## Problem Statement
