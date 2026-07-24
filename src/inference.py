@@ -9,20 +9,28 @@ Target: <15ms per image on GPU, <5s total.
 """
 
 import os
+import sys
 import time
 import logging
 from pathlib import Path
 from typing import Union, List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
+# When this file is loaded as ``src.inference`` (test runner) the absolute
+# ``from model import ...`` below fails because ``src/`` is not on sys.path.
+# Prepend this file's directory so the siblings resolve either way.
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
 import numpy as np
 import torch
 import torch.nn as nn
 from PIL import Image
 
-from model import AstroClassifier
-from dataset import CLASS_NAMES_DISPLAY, get_val_transforms
-from utils import get_device
+from model import AstroClassifier  # noqa: E402
+from dataset import CLASS_NAMES_DISPLAY, get_val_transforms  # noqa: E402
+from utils import get_device  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)

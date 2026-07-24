@@ -7,10 +7,14 @@ Combines official guide (page 13) with our batched TTA,
 confusion matrix, per-class metrics, and confidence analysis.
 """
 
-import os
+import sys
 import json
 import logging
 from pathlib import Path
+
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 import numpy as np
 import torch
@@ -22,9 +26,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from dataset import AstroDataset, CLASS_NAMES_DISPLAY, get_val_transforms
-from model import AstroClassifier
-from utils import load_config, load_checkpoint, compute_metrics, get_device
+from dataset import AstroDataset, CLASS_NAMES_DISPLAY  # noqa: E402
+from model import AstroClassifier  # noqa: E402
+from utils import load_config, load_checkpoint, compute_metrics, get_device  # noqa: E402
 from PIL import Image
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")

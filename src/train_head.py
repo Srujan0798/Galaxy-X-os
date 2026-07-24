@@ -13,7 +13,12 @@ expects, so src/evaluate.py can load it directly.
 """
 
 import time
+import sys
 from pathlib import Path
+
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 import torch
 import torch.nn as nn
@@ -21,9 +26,9 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from tqdm import tqdm
 
-from dataset import get_loaders
-from model import AstroClassifier
-from utils import load_config, setup_logger, set_seed, compute_metrics, get_device
+from dataset import get_loaders  # noqa: E402
+from model import AstroClassifier  # noqa: E402
+from utils import load_config, setup_logger, set_seed, compute_metrics, get_device  # noqa: E402
 
 
 def run_epoch(model, loader, criterion, device, optimizer=None):

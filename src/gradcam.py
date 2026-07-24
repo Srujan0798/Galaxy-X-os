@@ -11,9 +11,15 @@ Improved version of official guide (page 15-16):
 """
 
 import os
+import sys
 import random
 import logging
-from typing import List, Tuple, Dict, Optional
+from pathlib import Path
+from typing import List, Dict, Optional
+
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 import cv2
 import numpy as np
@@ -24,8 +30,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from dataset import AstroDataset, CLASS_NAMES_DISPLAY, get_val_transforms
-from model import AstroClassifier
+from dataset import AstroDataset, CLASS_NAMES_DISPLAY, get_val_transforms  # noqa: E402
+from model import AstroClassifier  # noqa: E402
 
 try:
     from pytorch_grad_cam import GradCAM
@@ -271,12 +277,8 @@ def _create_summary_grid(results: List[Dict], output_dir: str):
 # ---------------------------------------------------------------------------
 
 def main():
-    config = load_config() if 'load_config' in globals() else None
-    if config is None:
-        from utils import load_config
-        config = load_config()
-
-    from utils import get_device
+    from utils import load_config, get_device
+    config = load_config()
     device = get_device()
     model = load_model_for_gradcam(config.get("eval_checkpoint", "checkpoints/best_model.pth"), device)
     test_dataset = AstroDataset(config["data"]["processed_dir"], "test", config["data"]["image_size"])

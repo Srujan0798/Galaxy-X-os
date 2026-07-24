@@ -223,18 +223,22 @@ def get_galaxy10(per_class: int, image_size: int, rng: random.Random
 # ---------------------------------------------------------------------------
 
 def kaggle_credentials_present() -> bool:
-    """True if any supported Kaggle credential is available.
+    """Return True if any supported Kaggle credential is present.
 
-    Supports both the legacy ``kaggle.json`` (username+key) and the newer
-    ``KGAT_`` API-token format (``~/.kaggle/access_token`` or the
-    ``KAGGLE_API_TOKEN`` env var).
+    Accepted formats:
+      1. Legacy kaggle.json   -> ~/.kaggle/kaggle.json
+      2. New KGAT_ token      -> ~/.kaggle/access_token
+      3. New KGAT_ token env  -> KAGGLE_API_TOKEN
+      4. Legacy kaggle.json env -> KAGGLE_USERNAME + KAGGLE_KEY
     """
     kdir = Path.home() / ".kaggle"
-    if (kdir / "kaggle.json").exists() or (kdir / "access_token").exists():
-        return True
-    if os.environ.get("KAGGLE_API_TOKEN"):
-        return True
-    return bool(os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"))
+    legacy_file = (kdir / "kaggle.json").exists()
+    new_token_file = (kdir / "access_token").exists()
+    new_token_env = bool(os.environ.get("KAGGLE_API_TOKEN"))
+    legacy_env = bool(
+        os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY")
+    )
+    return legacy_file or new_token_file or new_token_env or legacy_env
 
 
 def _safe_extract_zip(z: "zipfile.ZipFile", dest: Path) -> None:
@@ -520,7 +524,14 @@ def assemble(per_class: int, image_size: int, seed: int, real_only: bool
 
 def stratified_split(images_by_class: Dict[str, List[Array]], seed: int
                      ) -> Dict[str, List[Tuple[str, Array]]]:
-    """DISJOINT stratified 80/10/10 split. Returns {split: [(class, array), ...]}."""
+    """DISJOINT stratified 80/10/10 split. Returns {split: [(class, array), ...]}.
+
+    Each class needs at least ``>= 2 * n_classes`` samples so that after the 20%
+    holdout each class still has >= 2 samples to split between val and test
+    (i.e. at least 1 per side). With fewer, the second StratifiedShuffleSplit
+    fails because some classes have < 2 samples in the holdout. We raise a
+    clear error directing the user to increase --per-class.
+    """
     from sklearn.model_selection import StratifiedShuffleSplit
 
     items: List[Tuple[str, Array]] = []
@@ -531,6 +542,17 @@ def stratified_split(images_by_class: Dict[str, List[Array]], seed: int
             labels.append(idx)
     y = np.array(labels)
     X = np.arange(len(items))
+
+    counts_per_class = {cls: len(images_by_class[cls]) for cls in CLASSES}
+    min_count = min(counts_per_class.values())
+    n_classes = len(CLASSES)
+    if min_count < 2 * n_classes:
+        bad = {c: n for c, n in counts_per_class.items() if n < 2 * n_classes}
+        raise ValueError(
+            f"Cannot build 80/10/10 stratified split: need >= {2 * n_classes} "
+            f"images per class (got {counts_per_class}). Too-small classes: "
+            f"{bad}. Increase --per-class to at least {2 * n_classes}."
+        )
 
     s1 = StratifiedShuffleSplit(n_splits=1, test_size=0.20, random_state=seed)
     train_idx, temp_idx = next(s1.split(X, y))

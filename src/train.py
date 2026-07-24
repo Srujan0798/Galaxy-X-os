@@ -12,9 +12,15 @@ Combines official starter guide (page 11-12) with our best practices:
 - TensorBoard logging
 """
 
-import os
+import sys
 import time
 from pathlib import Path
+
+# Ensure sibling modules resolve when this file is loaded as ``src.train``
+# (e.g. by the test runner) -- prepend this file's dir to sys.path.
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 import torch
 import torch.nn as nn
@@ -24,9 +30,9 @@ from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from dataset import get_loaders
-from model import AstroClassifier
-from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device
+from dataset import get_loaders  # noqa: E402
+from model import AstroClassifier  # noqa: E402
+from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device  # noqa: E402
 
 
 def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp, scheduler=None):

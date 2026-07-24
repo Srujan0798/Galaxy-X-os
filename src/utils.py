@@ -9,7 +9,7 @@ import json
 import random
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 import numpy as np
 import torch
@@ -111,19 +111,31 @@ def load_checkpoint(filepath: str, model, device: torch.device):
 # ---------------------------------------------------------------------------
 
 def compute_metrics(labels, predictions, num_classes: int = 5) -> Dict:
-    """Compute accuracy, macro F1, and per-class F1."""
+    """Compute accuracy, macro F1, and per-class F1.
+
+    Always returns a per_class_f1 dict of length ``num_classes`` (padded with
+    0.0 for classes that don't appear in the labels/predictions) so downstream
+    code that iterates over all class names never crashes.
+    """
     labels = np.array(labels)
     predictions = np.array(predictions)
 
-    accuracy = (predictions == labels).mean()
-    macro_f1 = f1_score(labels, predictions, average="macro", zero_division=0)
-    per_class_f1 = f1_score(labels, predictions, average=None, zero_division=0)
+    accuracy = float((predictions == labels).mean())
+    macro_f1 = float(f1_score(labels, predictions, average="macro", zero_division=0))
+    per_class_f1_arr = f1_score(
+        labels, predictions, average=None, zero_division=0,
+        labels=list(range(num_classes)),
+    )
 
     from dataset import CLASS_NAMES_DISPLAY
+    per_class_f1 = {
+        CLASS_NAMES_DISPLAY[i]: float(per_class_f1_arr[i])
+        for i in range(num_classes)
+    }
     return {
-        "accuracy": float(accuracy),
-        "macro_f1": float(macro_f1),
-        "per_class_f1": {CLASS_NAMES_DISPLAY[i]: float(per_class_f1[i]) for i in range(num_classes)},
+        "accuracy": accuracy,
+        "macro_f1": macro_f1,
+        "per_class_f1": per_class_f1,
     }
 
 
