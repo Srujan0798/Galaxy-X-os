@@ -49,6 +49,7 @@ import json
 import time
 import random
 import shutil
+import zipfile
 import hashlib
 import argparse
 from pathlib import Path
@@ -222,7 +223,16 @@ def get_galaxy10(per_class: int, image_size: int, rng: random.Random
 # ---------------------------------------------------------------------------
 
 def kaggle_credentials_present() -> bool:
-    if (Path.home() / ".kaggle" / "kaggle.json").exists():
+    """True if any supported Kaggle credential is available.
+
+    Supports both the legacy ``kaggle.json`` (username+key) and the newer
+    ``KGAT_`` API-token format (``~/.kaggle/access_token`` or the
+    ``KAGGLE_API_TOKEN`` env var).
+    """
+    kdir = Path.home() / ".kaggle"
+    if (kdir / "kaggle.json").exists() or (kdir / "access_token").exists():
+        return True
+    if os.environ.get("KAGGLE_API_TOKEN"):
         return True
     return bool(os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"))
 
