@@ -8,18 +8,18 @@
 | 15 Grad-CAM figures | `results/gradcam/*.png` | `python src/gradcam.py` with the trained checkpoint. |
 | Confusion matrix + per-class F1 | `results/confusion_matrix.png`, `results/per_class_metrics.png` | `python src/evaluate.py`. |
 
-## Two distinct manifests — do not confuse them
+## Manifest
 
-1. **`data/processed/DATA_MANIFEST.json` (committed)** — a small, no-auth,
-   procedural-only manifest (~50 images) kept so the repo is portable and the
-   integration test (`tests/integration/test_pipeline.py`) runs without network.
-   **It is NOT the training manifest.** It exists to prove the pipeline runs.
-2. **Colab training manifest** — produced by `notebooks/Galaxy_X_Colab.ipynb`
-   on a Colab T4 with real Galaxy10 + Kaggle data (creds via the notebook's
-   Kaggle-token cell). The reported 93.17% / 92.77% come from this run. The
-   per-class F1s in `results/evaluation_results.json` (Spiral 0.884, Elliptical
-   0.895, Nebula/Cluster/Planetary 1.000) reflect real imagery for the two
-   galaxy classes and Kaggle/procedural for the rest.
+`data/processed/DATA_MANIFEST.json` (committed) is the manifest from the
+real Colab T4 run that produced the reported 93.17% / 92.77% numbers. All five
+classes are real: Spiral + Elliptical from Galaxy10 DECaLS (500 each), Nebula /
+Star Cluster / Planetary from the NASA Image Library (500 / 485 / 499). The
+per-class F1s in `results/evaluation_results.json` (Spiral 0.887, Elliptical
+0.895, Nebula 0.949, Star Cluster 0.947, Planetary 0.980) reflect real telescope
+imagery for every class.
+
+The integration test (`tests/integration/test_pipeline.py`) writes to a temp
+directory via `--output-dir` so it never overwrites this committed manifest.
 
 ## Checkpoint integrity
 
