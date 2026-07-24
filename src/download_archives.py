@@ -179,9 +179,17 @@ def _http_json(url: str, timeout: int = 20) -> Optional[dict]:
         return None
 
 
+def _safe_url(url: str) -> str:
+    """Percent-encode the path so hrefs with spaces/control chars (e.g. NASA ids
+    like 'A Galactic Spectacle_...') don't raise 'URL can't contain control characters'."""
+    p = urllib.parse.urlsplit(url)
+    return urllib.parse.urlunsplit(
+        (p.scheme, p.netloc, urllib.parse.quote(p.path), p.query, p.fragment))
+
+
 def _http_bytes(url: str, timeout: int = 20) -> Optional[bytes]:
     try:
-        req = urllib.request.Request(url, headers=_UA)
+        req = urllib.request.Request(_safe_url(url), headers=_UA)
         with urllib.request.urlopen(req, timeout=timeout, context=_SSL) as r:
             return r.read()
     except Exception as e:

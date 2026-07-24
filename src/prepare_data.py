@@ -614,6 +614,33 @@ def procedural_class(cls: str, count: int, image_size: int, seed: int) -> List[A
 # Assembly + split + write
 # ---------------------------------------------------------------------------
 
+def _global_dedupe(images_by_class: Dict[str, List[Array]]) -> Dict[str, List[Array]]:
+    """Remove any image whose content hash already appeared in ANY class.
+
+    Per-class dedup can't catch a byte-identical image that legitimately comes back
+    under two different queries/classes (e.g. one Hubble frame tagged both "nebula"
+    and "star cluster"). Without this, that image lands in two splits and trips the
+    leakage assertion. Keeping only the first global occurrence guarantees every
+    image is unique everywhere, so the disjoint-split guarantee always holds.
+    """
+    seen: set = set()
+    out: Dict[str, List[Array]] = {}
+    removed = 0
+    for cls in CLASSES:
+        kept: List[Array] = []
+        for arr in images_by_class.get(cls, []):
+            h = md5_array(arr)
+            if h in seen:
+                removed += 1
+                continue
+            seen.add(h)
+            kept.append(arr)
+        out[cls] = kept
+    if removed:
+        print(f"  [dedup] removed {removed} globally-duplicate image(s) across classes")
+    return out
+
+
 def assemble(per_class: int, image_size: int, seed: int, real_only: bool
              ) -> Tuple[Dict[str, List[Array]], Dict[str, dict]]:
     """Return (images_by_class, manifest_by_class) honouring real-first strategy."""
@@ -837,6 +864,12 @@ def main() -> None:
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
     images_by_class, manifest = assemble(args.per_class, image_size, args.seed, args.real_only)
+
+    # Guarantee global content-uniqueness before splitting (prevents the same real
+    # image appearing in two classes/splits -> leakage assertion). Refresh manifest counts.
+    images_by_class = _global_dedupe(images_by_class)
+    for cls in CLASSES:
+        manifest[cls]["count"] = len(images_by_class[cls])
 
     print("\n[3/3] Stratified 80/10/10 split + write + leakage check...")
     split_data = stratified_split(images_by_class, args.seed)
