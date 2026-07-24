@@ -30,6 +30,9 @@ lint:
 	ruff check src/ || true
 	mypy src/ || true
 
+validate:
+	python src/validate_dataset.py
+
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.pyc' -delete

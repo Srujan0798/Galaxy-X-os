@@ -65,18 +65,18 @@ def preprocess_split(split: str, preprocessor: AstroPreprocessor, max_workers: i
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
-                executor.submit(preprocess_image, preprocessor, inp, out): (inp, out)
+                executor.submit(preprocess_image, preprocessor, inp, out): out
                 for inp, out in tasks
             }
             for future in tqdm(as_completed(futures), total=len(tasks), desc=f"  {split}/{class_name}", leave=False):
                 success = future.result()
-                class_name_for_stats = img_path.parent.name
+                class_name_for_stats = futures[future].parent.name
                 if success:
                     stats["success"] += 1
-                    stats["by_class"][class_name]["success"] += 1
+                    stats["by_class"][class_name_for_stats]["success"] += 1
                 else:
                     stats["failed"] += 1
-                    stats["by_class"][class_name]["failed"] += 1
+                    stats["by_class"][class_name_for_stats]["failed"] += 1
 
     return stats
 

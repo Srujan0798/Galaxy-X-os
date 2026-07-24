@@ -9,9 +9,14 @@ Usage:
 """
 
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Dict, Tuple
+
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 import numpy as np
 from PIL import Image
@@ -106,7 +111,7 @@ def compute_class_weights(counts: Dict[str, Dict]) -> Dict[str, float]:
 
 def validate_with_dataset():
     """Validate that AstroDataset can load the data."""
-    from dataset import AstroDataset
+    from dataset import AstroDataset  # noqa: E402
 
     errors = []
     for split in SPLITS:
