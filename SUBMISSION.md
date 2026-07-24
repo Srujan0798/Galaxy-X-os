@@ -57,6 +57,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 **Done**
 - End-to-end pipeline: data prep → train → evaluate (+TTA) → Grad-CAM → Streamlit demo.
+- **Demo video** (Deliverable 5): [`docs/presentation/demo.mp4`](docs/presentation/demo.mp4) — 76 s, 1280×720, H.264. Walks through architecture → metrics → confusion matrix → per-class F1 → confidence distribution → all 15 Grad-CAM samples → summary grid. Script: [`docs/presentation/Demo_Video_Script.md`](docs/presentation/Demo_Video_Script.md).
 - Real data sources: Galaxy10 DECaLS survey imagery (via astroNN) for Spiral + Elliptical; **NASA Image Library** (images.nasa.gov, no API key — Hubble/Spitzer/JPL) for Nebula / Star Cluster / Planetary, retrieved by keyword with per-class purity filtering (`src/download_archives.py`). Kaggle deep-space images (`fedesoriano/deep-space-images`, `brsdincer/planetary-solar-system-objects`) and a clearly-labelled procedural fallback remain as fallbacks only, so the pipeline never breaks. All five classes can now be built from real imagery with no API key.
 - Honest per-class source record in `data/processed/DATA_MANIFEST.json` (rebuilt by `python src/prepare_data.py`).
 - Disjoint stratified split, verified by MD5 hash that no image appears in >1 split.

@@ -101,7 +101,7 @@ Galaxy-X-os/
 ├── results/                         # confusion_matrix.png, gradcam/, evaluation_results.json
 ├── tests/                           # pytest suites (unit / integration / e2e)
 ├── attic/                           # Archived orchestration scaffolding + superseded src files
-└── docs/                            # ADRs, runbooks, presentation/
+└── docs/                            # ADRs, runbooks, presentation/ (incl. demo.mp4)
 ```
 
 ---

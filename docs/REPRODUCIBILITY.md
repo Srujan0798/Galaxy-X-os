@@ -32,11 +32,28 @@
    [v1.0 Release](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0)
    and drop in `checkpoints/`.
 
-After downloading, verify integrity and record the hash here:
+After downloading, verify integrity against this hash:
 
 ```
-SHA256: <fill in after running `shasum -a 256 checkpoints/best_model.pth`>
+SHA256: fab9935356e8a0cfa1803be3deabf998e2b6f3fa56b017ef0f6101eaf232c88b
+Size:   134 MB (140328300 bytes)
 ```
+
+```bash
+shasum -a 256 checkpoints/best_model.pth   # macOS
+sha256sum checkpoints/best_model.pth       # Linux
+```
+
+> **Release creation note:** the v1.0 git tag is pushed. To publish the
+> checkpoint + demo video as release assets, run (the fine-grained PAT used by
+> `gh` here lacks the `contents:write` permission for releases, so this must be
+> run with a token that has release scope, e.g. a classic PAT with `repo` scope):
+>
+> ```bash
+> gh release create v1.0 checkpoints/best_model.pth docs/presentation/demo.mp4 \
+>   --title "v1.0 — Trained EfficientNet-B3 (95.6% / 96.4% TTA)" \
+>   --notes "Final trained model. SHA256: fab9935356e8a0cfa1803be3deabf998e2b6f3fa56b017ef0f6101eaf232c88b. Drop in checkpoints/best_model.pth then run python src/evaluate.py to reproduce 95.6%/96.4% TTA. Demo video: docs/presentation/demo.mp4."
+> ```
 
 ## Environment
 
