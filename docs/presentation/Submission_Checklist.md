@@ -80,7 +80,7 @@ python src/train.py
 python src/evaluate.py
 python src/gradcam.py
 python src/inference.py data/processed/test/ --batch-size 16
-python src/bonus.py data/processed/test/spiral_galaxy/sample.jpg
+python src/bonus.py --image data/processed/test/spiral_galaxy/sample.jpg
 
 # Launch web demo for recording
 streamlit run app/app.py

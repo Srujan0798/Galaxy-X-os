@@ -49,7 +49,7 @@ The one-page report ([`REPORT.md`](REPORT.md) → [`REPORT.pdf`](REPORT.pdf)) co
 
 ## Grad-CAM Outputs Present (`results/gradcam/`)
 
-15 per-sample 3-panel figures, `sample_01..15_*.png` (from the final 93.17%-accuracy run on fully-real imagery), plus `_summary_grid.png`. Includes both correct and incorrect predictions so reviewers can see where the model actually looks.
+15 per-sample 3-panel figures, `sample_01..15_*.png` (from the final 93.17%-accuracy run on imagery built primarily from real telescope sources), plus `_summary_grid.png`. Includes both correct and incorrect predictions so reviewers can see where the model actually looks.
 
 ---
 

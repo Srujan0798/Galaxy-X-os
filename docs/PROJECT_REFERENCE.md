@@ -13,7 +13,7 @@
 
 ## Model & results
 - **Architecture:** EfficientNet-B3 (timm, ImageNet pretrained), ~11.6M params, 224×224 input.
-- **Current metrics** (fully-real Colab T4 run): 93.17% acc / 92.77% TTA / macro-F1 0.932 / 0.928.
+- **Current metrics** (Colab T4 run on imagery built primarily from real telescope sources): 93.17% acc / 92.77% TTA / macro-F1 0.932 / 0.928.
 - **Inference:** per-image latency is well under the 5 s requirement on consumer hardware (exact number depends on device and warm-up state).
 - **Pending:** none — submission numbers are final.
 

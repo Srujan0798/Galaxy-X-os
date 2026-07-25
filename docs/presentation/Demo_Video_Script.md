@@ -69,7 +69,7 @@ Show the rapid output with filenames, predictions, and confidence scores scrolli
 **Screen**: Terminal
 **Actions**:
 ```bash
-python src/bonus.py data/processed/test/nebula/sample.jpg
+python src/bonus.py --image data/processed/test/nebula/sample.jpg
 ```
 Show the output: classification, natural language caption, and anomaly detection result.
 

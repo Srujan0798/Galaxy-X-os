@@ -41,6 +41,8 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/DATA_MANIFEST.json
+!data/processed/class_weights.json
 checkpoints/*.pth
 !checkpoints/.gitkeep
 results/*

@@ -1,0 +1,44 @@
+{
+  "generated_utc": "2026-07-24T17:27:40Z",
+  "per_class_target": 500,
+  "image_size": 224,
+  "seed": 42,
+  "real_only": false,
+  "classes": {
+    "spiral_galaxy": {
+      "source": "Galaxy10 DECaLS (astroNN) | https://astronn.readthedocs.io/en/latest/galaxy10.html (DECaLS) / galaxy10sdss.html (SDSS)",
+      "count": 500,
+      "image_size": 224,
+      "is_real": true
+    },
+    "elliptical_galaxy": {
+      "source": "Galaxy10 DECaLS (astroNN) | https://astronn.readthedocs.io/en/latest/galaxy10.html (DECaLS) / galaxy10sdss.html (SDSS)",
+      "count": 500,
+      "image_size": 224,
+      "is_real": true
+    },
+    "nebula": {
+      "source": "NASA Image Library | https://images.nasa.gov (https://images-api.nasa.gov) + procedural-fallback",
+      "count": 500,
+      "image_size": 224,
+      "is_real": true
+    },
+    "star_cluster": {
+      "source": "NASA Image Library | https://images.nasa.gov (https://images-api.nasa.gov) + procedural-fallback",
+      "count": 485,
+      "image_size": 224,
+      "is_real": true
+    },
+    "planetary": {
+      "source": "NASA Image Library | https://images.nasa.gov (https://images-api.nasa.gov)",
+      "count": 499,
+      "image_size": 224,
+      "is_real": true
+    }
+  },
+  "split_ratios": {
+    "train": 0.8,
+    "val": 0.1,
+    "test": 0.1
+  }
+}

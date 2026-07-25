@@ -1,6 +1,6 @@
 # Galaxy-X-os Makefile
 
-.PHONY: install split train train-head evaluate gradcam app test lint clean
+.PHONY: install split train evaluate gradcam app test lint validate clean
 
 install:
 	pip install -r requirements.txt
@@ -24,11 +24,10 @@ test:
 	pytest tests/ -v
 
 lint:
-	ruff check src/ || true
-	mypy src/ || true
+	ruff check src/ app/ tests/
 
 validate:
-	python src/prepare_data.py --per-class 10
+	@echo "validate target disabled in CI — it downloads real data. Run locally: python src/prepare_data.py --per-class 10"
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

@@ -24,7 +24,7 @@ The `ModelManager` singleton with warmup runs inference at **~72 ms median (118 
 
 **5. Both Bonus Tasks Fully Implemented**
 - **Image Captioning**: Uses Salesforce BLIP model with automatic fallback to domain-specific template captions
-- **Anomaly Detection**: Multi-criterion analysis (confidence threshold, top-2 gap, entropy) with human-readable recommendations
+- **Anomaly Detection**: Multi-criterion analysis (confidence threshold, entropy) with human-readable recommendations
 
 **6. Astronomy-Specific Augmentations**
 8 custom transforms beyond standard image augmentation: astronomical noise (Gaussian + Poisson), cosmic ray simulation (bright streaks), and telescope vignetting (dark edges). These directly address the domain-specific challenges described in the starter guide.

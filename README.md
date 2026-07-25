@@ -3,7 +3,7 @@
 **Sequence-Based Classification of Astronomical Objects Using Deep Learning**
 
 > Deep learning model for classifying raw astronomical images into 5 celestial categories.
-> **TechOIITGN Hackathon Submission** | **93.17% test accuracy (92.77% with TTA, 0.93 macro F1)** on fully-real imagery | **Grad-CAM explainability + Web Demo**
+> **TechOIITGN Hackathon Submission** | **93.17% test accuracy (92.77% with TTA, 0.93 macro F1)** on imagery built primarily from real telescope sources | **Grad-CAM explainability + Web Demo**
 
 ---
 
@@ -49,7 +49,7 @@ python src/gradcam.py
 python src/inference.py data/processed/test/spiral_galaxy/ --batch-size 16
 
 # 7. Bonus: caption + anomaly detection
-python src/bonus.py data/processed/test/spiral_galaxy/spiral_galaxy_0000.png
+python src/bonus.py --image data/processed/test/spiral_galaxy/spiral_galaxy_0000.png
 
 # 8. Launch web demo (record for submission!)
 streamlit run app/app.py
@@ -224,7 +224,7 @@ streamlit run app/app.py
 - Full probability distribution bar chart
 - **Grad-CAM heatmap overlay** with explanation
 - **Offline template caption** for the predicted class (BLIP with automatic template fallback)
-- **Softmax-entropy anomaly / OOD flag** (low-confidence + top-2 gap + entropy)
+- **Softmax-entropy anomaly / OOD flag** (low-confidence + entropy)
 - GPU/CPU info sidebar
 - Cached model loading for instant response
 
@@ -284,9 +284,9 @@ print(det.analyze(result)["is_anomaly"])
 ### Run all bonuses together
 
 ```bash
-python src/bonus.py path/to/image.jpg            # caption + localization + OOD
-python src/bonus.py path/to/image.jpg --no-localize  # skip localization
-python src/bonus.py path/to/image.jpg --use-blip    # opt into BLIP
+python src/bonus.py --image path/to/image.jpg            # caption + localization + OOD
+python src/bonus.py --image path/to/image.jpg --no-localize  # skip localization
+python src/bonus.py --image path/to/image.jpg --use-blip    # opt into BLIP
 ```
 
 ---
