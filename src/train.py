@@ -32,7 +32,7 @@ from tqdm import tqdm
 
 from dataset import get_loaders  # noqa: E402
 from model import AstroClassifier  # noqa: E402
-from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device, check_data_exists, get_autocast_context  # noqa: E402
+from utils import load_config, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device, check_data_exists, get_autocast_context  # noqa: E402
 
 
 def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp, scheduler=None):
@@ -187,8 +187,6 @@ def main():
         logger.info(f"Using {torch.cuda.device_count()} GPUs")
         model = nn.DataParallel(model)
 
-    # Loss + weights
-    class_weights = load_class_weights(data_dir, device)
     # Loss: Focal Loss + Label Smoothing
     focal_gamma = config["training"].get("focal_gamma", 2.0)
     from utils import FocalLoss, LabelSmoothingCrossEntropy
