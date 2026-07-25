@@ -26,13 +26,13 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR
-from torch.amp import autocast, GradScaler
+from torch.amp import GradScaler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from dataset import get_loaders  # noqa: E402
 from model import AstroClassifier  # noqa: E402
-from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device, check_data_exists  # noqa: E402
+from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device, check_data_exists, get_autocast_context  # noqa: E402
 
 
 def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp, scheduler=None):
@@ -45,7 +45,7 @@ def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp
         optimizer.zero_grad(set_to_none=True)
 
         if use_amp and scaler is not None and device.type in ("cuda", "mps"):
-            with autocast(device_type=device.type):
+            with get_autocast_context(device.type):
                 outputs = model(images)
                 loss = criterion(outputs, labels)
             scaler.scale(loss).backward()

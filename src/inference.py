@@ -30,7 +30,7 @@ from PIL import Image
 
 from model import AstroClassifier  # noqa: E402
 from dataset import CLASS_NAMES_DISPLAY, get_val_transforms  # noqa: E402
-from utils import get_device  # noqa: E402
+from utils import get_device, get_autocast_context  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -124,7 +124,7 @@ class ModelManager:
         t0 = time.perf_counter()
 
         if self.device.type in ("cuda", "mps"):
-            with torch.autocast(device_type=self.device.type, dtype=torch.float16):
+            with get_autocast_context(self.device.type):
                 logits = self.model(input_tensor)
         else:
             logits = self.model(input_tensor)
@@ -158,7 +158,7 @@ class ModelManager:
         for i in range(0, len(images), batch_size):
             batch = all_tensors[i:i + batch_size].to(self.device, non_blocking=True)
             if self.device.type in ("cuda", "mps"):
-                with torch.autocast(device_type=self.device.type, dtype=torch.float16):
+                with get_autocast_context(self.device.type):
                     logits = self.model(batch)
             else:
                 logits = self.model(batch)

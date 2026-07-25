@@ -9,6 +9,7 @@ import sys
 import json
 import random
 import logging
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Dict
 
@@ -52,6 +53,28 @@ def check_data_exists(data_dir: str = "data/processed") -> None:
 # ---------------------------------------------------------------------------
 # Reproducibility
 # ---------------------------------------------------------------------------
+
+_MPS_AUTOCAST_OK = None
+
+
+def get_autocast_context(device_type: str, dtype=torch.float16):
+    """Return an autocast context manager, or a no-op if this device/torch build
+    doesn't support it (e.g. torch==2.4.1 raises RuntimeError for device_type='mps')."""
+    global _MPS_AUTOCAST_OK
+    if device_type == "cuda":
+        return torch.autocast(device_type="cuda", dtype=dtype)
+    if device_type == "mps":
+        if _MPS_AUTOCAST_OK is None:
+            try:
+                with torch.autocast(device_type="mps", dtype=dtype):
+                    pass
+                _MPS_AUTOCAST_OK = True
+            except RuntimeError:
+                _MPS_AUTOCAST_OK = False
+        if _MPS_AUTOCAST_OK:
+            return torch.autocast(device_type="mps", dtype=dtype)
+    return nullcontext()
+
 
 def set_seed(seed: int = 42):
     """Set random seeds for reproducibility."""
