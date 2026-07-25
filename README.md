@@ -27,44 +27,57 @@
 
 ---
 
-## Quick Start
+## Quick Start (Demo)
+
+Get the demo running in 3 steps:
 
 ```bash
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Prepare data (downloads real data + writes DATA_MANIFEST.json)
-python src/prepare_data.py
+# 2. Get the checkpoint (ONE of):
+#    A) Download from Release:
+wget https://github.com/Srujan0798/Galaxy-X-os/releases/download/v1.0/best_model.pth -P checkpoints/
+#    B) Train from scratch (Colab): open notebooks/Galaxy_X_Colab.ipynb
 
-# 3. Train (full EfficientNet-B3 fine-tune)
-python src/train.py
-
-# 4. Evaluate (standard + TTA)
-python src/evaluate.py
-
-# 5. Generate Grad-CAM report (15 samples)
-python src/gradcam.py
-
-# 6. Fast inference test (use a flat image directory, or pass a single image)
-python src/inference.py data/processed/test/spiral_galaxy/ --batch-size 16
-
-# 7. Bonus: caption + anomaly detection
-python src/bonus.py --image data/processed/test/spiral_galaxy/spiral_galaxy_0000.png
-
-# 8. Launch web demo (record for submission!)
+# 3. Launch the web demo:
 streamlit run app/app.py
+# → Click a sample image or upload your own
+# → See: predicted class, confidence, bar chart, Grad-CAM, caption, OOD
 ```
 
-> **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
->
-> **Dataset & checkpoint note:** the reported 93.17% run used ~2,500 real images and a ~141 MB `best_model.pth`. Because GitHub's 100 MB file limit blocks the checkpoint and the full dataset, neither is committed. Two ways to get them: (1) **reproduce** them via the one-click Colab notebook or steps 2–3 above (~30 min on a free GPU) — this is the guaranteed path; (2) download the checkpoint from the [**v1.0 Release**](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0) and drop it in `checkpoints/`.
->
 > **Verify the checkpoint** after download:
 > ```bash
 > shasum -a 256 checkpoints/best_model.pth   # macOS
 > sha256sum checkpoints/best_model.pth       # Linux
 > ```
 > Record the hash in [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) so graders can confirm integrity.
+
+## Full Pipeline Reference
+
+```bash
+# Prepare data (downloads real data + writes DATA_MANIFEST.json)
+python src/prepare_data.py
+
+# Train (full EfficientNet-B3 fine-tune)
+python src/train.py
+
+# Evaluate (standard + TTA)
+python src/evaluate.py
+
+# Generate Grad-CAM report (15 samples)
+python src/gradcam.py
+
+# Fast inference test (use a flat image directory, or pass a single image)
+python src/inference.py data/processed/test/spiral_galaxy/ --batch-size 16
+
+# Bonus: caption + anomaly detection
+python src/bonus.py --image path/to/image.png
+```
+
+> **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
+>
+> **Dataset & checkpoint note:** the reported 93.17% run used ~2,500 real images and a ~141 MB `best_model.pth`. Because GitHub's 100 MB file limit blocks the checkpoint and the full dataset, neither is committed. See [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for hash verification.
 
 ---
 

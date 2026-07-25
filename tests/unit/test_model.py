@@ -1,5 +1,13 @@
+import inspect
+
 import torch
 from src.model import AstroClassifier
+
+
+def test_default_backbone_is_efficientnet_b3():
+    """Golden-path contract: default must match configs + best_model.pth."""
+    default = inspect.signature(AstroClassifier.__init__).parameters["backbone"].default
+    assert default == "efficientnet_b3"
 
 
 def test_model_forward():

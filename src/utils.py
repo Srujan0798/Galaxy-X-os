@@ -13,6 +13,8 @@ from typing import Dict
 
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import yaml
 from sklearn.metrics import f1_score
 
@@ -160,3 +162,52 @@ def setup_logger(log_dir: str, experiment_name: str) -> logging.Logger:
         ],
     )
     return logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Loss Functions
+# ---------------------------------------------------------------------------
+
+class FocalLoss(nn.Module):
+    """Focal Loss for class imbalance. γ=2.0 focuses on hard examples."""
+    def __init__(self, gamma: float = 2.0, alpha: float = 0.25,
+                 reduction: str = "mean"):
+        super().__init__()
+        self.gamma = gamma
+        self.alpha = alpha
+        self.reduction = reduction
+    
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        ce_loss = F.cross_entropy(inputs, targets, reduction="none")
+        pt = torch.exp(-ce_loss)
+        focal_loss = self.alpha * (1 - pt) ** self.gamma * ce_loss
+        
+        if self.reduction == "mean":
+            return focal_loss.mean()
+        elif self.reduction == "sum":
+            return focal_loss.sum()
+        return focal_loss
+
+
+class LabelSmoothingCrossEntropy(nn.Module):
+    """Cross entropy loss with label smoothing."""
+    def __init__(self, smoothing: float = 0.1, reduction: str = "mean"):
+        super().__init__()
+        self.smoothing = smoothing
+        self.reduction = reduction
+    
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        log_probs = F.log_softmax(inputs, dim=-1)
+        n_class = inputs.size(-1)
+        
+        with torch.no_grad():
+            true_dist = torch.zeros_like(log_probs)
+            true_dist.fill_(self.smoothing / (n_class - 1))
+            true_dist.scatter_(1, targets.data.unsqueeze(1), 1.0 - self.smoothing)
+        
+        loss = -true_dist * log_probs
+        if self.reduction == "mean":
+            return loss.sum(-1).mean()
+        elif self.reduction == "sum":
+            return loss.sum(-1).sum()
+        return loss.sum(-1)

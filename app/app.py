@@ -111,6 +111,19 @@ def render_header():
     st.markdown("---")
 
 
+def _find_samples():
+    samples_root = PROJECT_ROOT / "data" / "samples"
+    if not samples_root.exists():
+        return {}
+    samples = {}
+    for cls_dir in sorted(samples_root.iterdir()):
+        if cls_dir.is_dir():
+            images = sorted(cls_dir.glob("*.png")) + sorted(cls_dir.glob("*.jpg"))
+            if images:
+                samples[cls_dir.name] = images
+    return samples
+
+
 def render_sidebar():
     from utils import get_device
     with st.sidebar:
@@ -257,41 +270,59 @@ def main():
         render_footer()
         return
 
+    samples = _find_samples()
+    display_names = {
+        "spiral_galaxy": "Spiral Galaxy",
+        "elliptical_galaxy": "Elliptical Galaxy",
+        "nebula": "Nebula",
+        "star_cluster": "Star Cluster",
+        "planetary_object": "Planetary Object",
+    }
+
     uploaded = st.file_uploader("Drag and drop an astronomical image (JPG/PNG)",
                                 type=["jpg", "jpeg", "png"])
 
     if uploaded is not None:
         with _temp_uploaded_file(uploaded) as temp_path:
+            st.markdown("---")
+            st.subheader("🖼️ Uploaded Image")
             left, right = st.columns([1, 1])
             with left:
-                st.markdown("---")
-                st.subheader("🖼️ Uploaded Image")
                 st.image(temp_path, use_container_width=True)
-
             with right:
                 with st.spinner("Analyzing..."):
                     result = manager.predict(temp_path)
                 render_prediction_result(result)
                 render_probability_chart(result)
-
             render_gradcam(temp_path, manager)
             render_caption(temp_path, result)
             render_anomaly(result)
+    elif samples:
+        st.markdown("---")
+        st.subheader("📸 Try a Sample")
+        st.caption("Click a class below to load a demo image and run the full prediction + Grad-CAM pipeline.")
+        cols = st.columns(len(samples))
+        for col, (cls_name, paths) in zip(cols, sorted(samples.items())):
+            with col:
+                display = display_names.get(cls_name, cls_name)
+                st.markdown(f"**{display}**")
+                st.image(str(paths[0]), use_container_width=True)
+                if st.button(f"Try {display}", key=f"btn_{cls_name}", use_container_width=True):
+                    st.markdown("---")
+                    st.subheader("🖼️ Sample Image")
+                    left, right = st.columns([1, 1])
+                    with left:
+                        st.image(str(paths[0]), use_container_width=True)
+                    with right:
+                        with st.spinner("Analyzing..."):
+                            result = manager.predict(str(paths[0]))
+                        render_prediction_result(result)
+                        render_probability_chart(result)
+                    render_gradcam(str(paths[0]), manager)
+                    render_caption(str(paths[0]), result)
+                    render_anomaly(result)
     else:
         st.info("👆 Upload an astronomical image to begin classification.")
-        st.markdown("---")
-        st.subheader("📖 Example Classifications")
-        examples = [
-            ("Spiral Galaxy", "Spiral arm structure with central bulge"),
-            ("Elliptical Galaxy", "Smooth, featureless oval shape"),
-            ("Nebula", "Colorful gas and dust clouds"),
-            ("Star Cluster", "Dense grouping of bright stars"),
-            ("Planetary Object", "Planets, moons, or ring systems"),
-        ]
-        for col, (name, desc) in zip(st.columns(5), examples):
-            with col:
-                st.markdown(f"**{name}**")
-                st.caption(desc)
 
     render_footer()
 

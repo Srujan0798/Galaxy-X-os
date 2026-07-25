@@ -9,7 +9,7 @@ data:
   num_workers: 4
 
 model:
-  backbone: "efficientnet_b3"
+  backbone: "convnext_base"  # Primary backbone: convnext_base, swin_base, efficientnet_b3, vit_base
   num_classes: 5
   dropout: 0.4
 
@@ -18,10 +18,12 @@ training:
   lr: 3.0e-4
   weight_decay: 1.0e-4
   label_smoothing: 0.1
+  focal_gamma: 2.0
   batch_size: 32
   patience: 12
   mixed_precision: true
   freeze_backbone_epochs: 3
+  gradient_clip: 1.0
 
 paths:
   checkpoints: "checkpoints"
