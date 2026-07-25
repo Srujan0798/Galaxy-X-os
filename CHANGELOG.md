@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup per OS-Setup v1.3 (T1)
 - SCALE x ODYSSEY astronomical image classifier
 - EfficientNet-B3 backbone with custom head
-- 8 astronomy-specific augmentations (cosmic ray, vignetting, Poisson noise)
+- 3 astronomy-specific augmentations (cosmic ray, vignetting, Poisson noise)
 - Progressive unfreezing training strategy
 - Test-Time Augmentation (TTA)
 - Grad-CAM explainability with 3-panel visualizations

@@ -1,4 +1,4 @@
-# SCALE x ODYSSEY -- 2-Minute Demo Video Script
+# SCALE x ODYSSEY -- ~80-Second Demo Video Script
 
 ## Exact Narration + Screen Actions
 
@@ -128,7 +128,7 @@ Thank you!
 2. Resolution: 1920x1080 (1080p)
 3. Speak clearly and at moderate pace
 4. Pause 1-2 seconds between sections
-5. Total target: **1:50 - 2:00** (slightly under is fine)
+5. Total target: **1:15 - 1:30** (slightly under is fine)
 6. Export as MP4 (H.264 codec, ~10MB for 2 min)
 
 ## What Judges Want to See

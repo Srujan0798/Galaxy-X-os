@@ -31,7 +31,7 @@
 
 **Solution** (bullet points):
 - EfficientNet-B3 with transfer learning
-- 8 astronomy-specific data augmentations
+- 3 astronomy-specific data augmentations (cosmic ray simulation, vignetting, Poisson noise) plus standard geometric/color augmentations
 - Progressive unfreezing training strategy
 - Grad-CAM explainability + Streamlit web demo
 
@@ -88,7 +88,7 @@ Linear(256 -> 5) -> Softmax
 **Key Numbers** (big, bold):
 - **93.17%** Test Accuracy (standard)
 - **92.77%** Test Accuracy (with TTA)
-- **0.96** Macro F1
+- **0.932** Macro F1
 - **~11.6M** Model Parameters
 
 **Per-Class F1 Scores** (from `results/evaluation_results.json`):
@@ -103,7 +103,7 @@ Linear(256 -> 5) -> Softmax
 
 **Visual**: Confusion matrix image (from `results/confusion_matrix.png`)
 
-**Speaker Notes**: "Our model achieves 93.17% accuracy on the held-out test set, improving to 92.77% with test-time augmentation, for a macro F1 of 0.932. Nebula, Star Cluster, and Planetary classify perfectly; the residual confusion is between Spiral and Elliptical Galaxy, which share genuinely similar morphologies. We're transparent about where the residual error lives."
+**Speaker Notes**: "Our model achieves 93.17% accuracy on the held-out test set, improving to 92.77% with test-time augmentation, for a macro F1 of 0.932. Nebula, Star Cluster, and Planetary Object are the strongest classes; the residual confusion is between Spiral and Elliptical Galaxy, which share genuinely similar morphologies. We're transparent about where the residual error lives."
 
 ---
 
@@ -138,9 +138,11 @@ Linear(256 -> 5) -> Softmax
 
 **Bonus Features** (small box at bottom):
 - Image Captioning (BLIP): "A magnificent spiral galaxy..."
+- Object Localization: Bounding-box overlays on detected objects
 - Anomaly Detection: Flags uncertain predictions
+- Interactive Web Demo: Upload + Grad-CAM + predictions
 
-**Speaker Notes**: "Our Streamlit web demo lets anyone upload an astronomical image and get instant classification with confidence scores and Grad-CAM overlay. Bonus features include automatic captioning and anomaly detection for uncertain predictions."
+**Speaker Notes**: "Our Streamlit web demo lets anyone upload an astronomical image and get instant classification with confidence scores and Grad-CAM overlay. We also implemented all four bonus tasks: image captioning, object localization, anomaly detection, and the interactive web application."
 
 ---
 

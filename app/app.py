@@ -9,6 +9,7 @@ Matches official guide (page 17) with our beautiful UI:
 - Cached model loading for instant response
 """
 
+import os
 import sys
 import tempfile
 from contextlib import contextmanager
@@ -73,10 +74,16 @@ def _temp_uploaded_file(uploaded):
     suffix = Path(uploaded.name).suffix.lower()
     if suffix not in (".jpg", ".jpeg", ".png"):
         suffix = ".png"
-    with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
-        tmp.write(uploaded.getbuffer())
-        tmp.flush()
-        yield tmp.name
+    fd, path = tempfile.mkstemp(suffix=suffix)
+    try:
+        with os.fdopen(fd, "wb") as tmp:
+            tmp.write(uploaded.getbuffer())
+        yield path
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
 
 
 def _class_names():

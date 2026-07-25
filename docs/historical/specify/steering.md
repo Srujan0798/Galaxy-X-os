@@ -1,7 +1,7 @@
 # Steering
 
 ## North Star
-> Classify raw telescope images into 5 celestial categories. Current model achieves **95.6% test accuracy (96.4% with TTA, 0.96 macro F1)**.
+> Classify raw telescope images into 5 celestial categories. Current model achieves **93.17% test accuracy (92.77% with TTA, 0.93 macro F1)**.
 
 ## Constraints
 - No handcrafted features

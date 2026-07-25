@@ -52,6 +52,7 @@ import shutil
 import zipfile
 import hashlib
 import argparse
+import logging
 from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
@@ -62,6 +63,10 @@ from PIL import Image
 # Make sibling modules importable when run as ``python src/prepare_data.py``
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dataset import CLASSES  # exact 5 folder/label names, index 0..4  # noqa: E402
+
+# Logger
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+logger = logging.getLogger(__name__)
 
 # REAL source #2 for nebula/star_cluster/planetary: NASA Image Library
 # (public, no API key). See src/download_archives.py.
@@ -262,6 +267,8 @@ def get_nasa_classes(classes: List[str], per_class: int, image_size: int
 
     Real telescope imagery (Hubble / Spitzer / JPL) fetched by keyword with
     per-class purity filters (see src/download_archives.py). No credentials.
+    Also covers the two galaxy morphology classes as a fallback when Galaxy10
+    is unavailable.
     """
     if not _HAVE_NASA_ARCHIVES:
         print("  [nasa] download_archives not importable; skipping NASA source.")
@@ -869,6 +876,12 @@ def main() -> None:
     print(f"  Wrote {PROCESSED_DIR / 'class_weights.json'}: {weights}")
 
     # DATA_MANIFEST.json -- the honesty record
+    manifest_path = PROCESSED_DIR / "DATA_MANIFEST.json"
+    if manifest_path.exists() and not args.output_dir:
+        logger.warning(
+            "Overwriting committed DATA_MANIFEST.json at %s. "
+            "Use --output-dir to write to a different location.", manifest_path
+        )
     manifest_doc = {
         "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "per_class_target": args.per_class,

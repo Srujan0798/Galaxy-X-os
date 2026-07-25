@@ -22,12 +22,8 @@ Grad-CAM produces 3-panel figures per sample: Original Image, True-Class CAM, an
 **4. Interactive Deployment**
 The `ModelManager` singleton with warmup runs inference at **~72 ms median (118 ms mean) per image on Apple MPS** — well under the 5 s requirement, and faster on a CUDA GPU. The Streamlit web demo features drag-and-drop upload, real-time prediction with confidence scores, probability distribution charts, and Grad-CAM overlay -- all with cached model loading for instant response.
 
-**5. Both Bonus Tasks Fully Implemented**
-- **Image Captioning**: Uses Salesforce BLIP model with automatic fallback to domain-specific template captions
-- **Anomaly Detection**: Multi-criterion analysis (confidence threshold, entropy) with human-readable recommendations
-
 **6. Astronomy-Specific Augmentations**
-8 custom transforms beyond standard image augmentation: astronomical noise (Gaussian + Poisson), cosmic ray simulation (bright streaks), and telescope vignetting (dark edges). These directly address the domain-specific challenges described in the starter guide.
+3 custom transforms beyond standard image augmentation: astronomical noise (Gaussian + Poisson), cosmic ray simulation (bright streaks), and telescope vignetting (dark edges). These directly address the domain-specific challenges described in the starter guide.
 
 **7. Reproducibility and Documentation**
 Seed=42 everywhere, centralized YAML configuration, TensorBoard logging, 3 Jupyter notebooks (EDA, Training, Evaluation), comprehensive README with commands, and this executive summary.
@@ -39,7 +35,7 @@ Seed=42 everywhere, centralized YAML configuration, TensorBoard logging, 3 Jupyt
 | Classification Performance (40%) | **93.17% accuracy (92.77% with TTA)**, **0.932 macro F1 (0.928 TTA)**, per-class F1, confusion matrix, classification report |
 | Model Efficiency (15%) | ~11.6M params, mixed precision, batch processing, **~72 ms/image on Apple MPS** (faster on CUDA) |
 | Explainability (15%) | 15-sample 3-panel Grad-CAM, summary grid, confidence analysis |
-| Innovation/Bonus (15%) | Streamlit demo, BLIP captioning, anomaly detection, 8 astro augmentations |
+| Innovation/Bonus (15%) | Streamlit demo, BLIP captioning, anomaly detection, 3 astro augmentations |
 | Documentation (15%) | README, 3 notebooks, YAML config, demo video, this summary |
 
 ### The Bottom Line

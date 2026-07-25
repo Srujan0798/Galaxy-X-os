@@ -127,7 +127,10 @@ def compute_metrics(labels, predictions, num_classes: int = 5) -> Dict:
         labels=list(range(num_classes)),
     )
 
-    from dataset import CLASS_NAMES_DISPLAY
+    try:
+        from dataset import CLASS_NAMES_DISPLAY
+    except ImportError:
+        from src.dataset import CLASS_NAMES_DISPLAY
     per_class_f1 = {
         CLASS_NAMES_DISPLAY[i]: float(per_class_f1_arr[i])
         for i in range(num_classes)

@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-|   **Key Results** | 93.17% test accuracy (92.77% with TTA) / 0.932 macro F1 on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes built **primarily from real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application. **The reported run used the full 2,484-image real dataset; only a small preview of `data/processed/` is committed here. Reproduce via the Colab notebook or by running `prepare_data.py` + `train.py`. |
+|   **Key Results** | 93.17% test accuracy (92.77% with TTA) / 0.932 macro F1 on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes built **primarily from real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application. **The reported training run used ~2,500 real images** (500/class for galaxies, 500 nebula, 485 star cluster, 499 planetary); only a small preview of `data/processed/` is committed here. Reproduce via the Colab notebook or by running `prepare_data.py` + `train.py`. |
 
 ### 5-Class Taxonomy
 
@@ -311,7 +311,7 @@ jupyter lab notebooks/
 |-----------|--------|
 | Framework | PyTorch 2.4+ |
 | Backbone | EfficientNet-B3 (~11.6M params) via timm |
-| Augmentation | Albumentations + 8 custom astro transforms |
+| Augmentation | Albumentations + 3 custom astro transforms (cosmic ray, vignetting, Poisson noise) |
 | Scheduler | OneCycleLR |
 | Optimizer | AdamW |
 | Mixed Precision | torch.amp |

@@ -14,6 +14,7 @@ import os
 import sys
 import random
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -284,7 +285,7 @@ def main():
     parser.add_argument("--config", default="configs/config.yaml", help="Path to YAML config")
     parser.add_argument("--checkpoint", default=None, help="Path to checkpoint (default from config eval_checkpoint)")
     parser.add_argument("--device", default=None, choices=["cuda", "mps", "cpu"], help="Force device")
-    parser.add_argument("--output-dir", default=None, help="Directory to write Grad-CAM outputs")
+    parser.add_argument("--output-dir", default=None, help="Directory to write Grad-CAM outputs (default: timestamped under results/gradcam_runs/)")
     parser.add_argument("--num-samples", type=int, default=15, help="Number of samples to visualize")
     args = parser.parse_args()
 
@@ -292,7 +293,12 @@ def main():
     config = load_config(args.config)
     device = torch.device(args.device) if args.device else get_device()
     checkpoint_path = args.checkpoint or config.get("eval_checkpoint", "checkpoints/best_model.pth")
-    output_dir = args.output_dir or config["paths"].get("gradcam_dir", "results/gradcam")
+    if args.output_dir:
+        output_dir = args.output_dir
+    else:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = os.path.join("results", "gradcam_runs", ts)
+        os.makedirs(output_dir, exist_ok=True)
 
     model = load_model_for_gradcam(checkpoint_path, device)
     test_dataset = AstroDataset(config["data"]["processed_dir"], "test", config["data"]["image_size"])

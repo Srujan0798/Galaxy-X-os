@@ -6,28 +6,28 @@ install:
 	pip install -r requirements.txt
 
 split:
-	python src/prepare_data.py
+	python3 src/prepare_data.py
 
 train:
-	python src/train.py
+	python3 src/train.py
 
 evaluate:
-	python src/evaluate.py
+	python3 src/evaluate.py
 
 gradcam:
-	python src/gradcam.py
+	python3 src/gradcam.py
 
 app:
 	streamlit run app/app.py
 
 test:
-	pytest tests/ -v
+	python3 -m pytest tests/ -v
 
 lint:
 	ruff check src/ app/ tests/
 
 validate:
-	@echo "validate target disabled in CI — it downloads real data. Run locally: python src/prepare_data.py --per-class 10"
+	@echo "validate target disabled in CI — it downloads real data. Run locally: python3 src/prepare_data.py --per-class 10"
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

@@ -106,6 +106,22 @@ def dedupe(arrs: List[Array]) -> List[Array]:
 # exclude: item REJECTED if ANY substring is present (checked first).
 
 CLASS_QUERIES: Dict[str, Dict[str, object]] = {
+    "spiral_galaxy": {
+        "queries": [
+            "spiral galaxy", "spiral galaxy hubble", "barred spiral galaxy",
+            "face-on spiral galaxy", "disk galaxy spiral",
+        ],
+        "include": ["spiral"],
+        "exclude": ["elliptical", "irregular", "nebula", "cluster"],
+    },
+    "elliptical_galaxy": {
+        "queries": [
+            "elliptical galaxy", "elliptical galaxy hubble", "lenticular galaxy",
+            "elliptical galaxy cluster",
+        ],
+        "include": ["elliptical"],
+        "exclude": ["spiral", "nebula", "cluster"],
+    },
     "nebula": {
         "queries": [
             "emission nebula", "planetary nebula", "supernova remnant nebula",

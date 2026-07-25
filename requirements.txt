@@ -54,7 +54,6 @@ mypy==1.11.2
 
 # SSL certificates for NASA Image Library downloads
 certifi
-python-dotenv==1.0.1
 
 # Progress bars
 tqdm==4.66.5

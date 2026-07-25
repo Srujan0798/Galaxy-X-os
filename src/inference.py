@@ -231,3 +231,4 @@ if __name__ == "__main__":
         print("=" * 60)
     else:
         logger.error(f"Path not found: {image_path}")
+        raise SystemExit(1)
