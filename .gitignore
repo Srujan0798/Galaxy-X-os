@@ -79,10 +79,9 @@ checkpoints/*.pth
 # Local archive of orchestration scaffolding (not part of deliverable)
 attic/
 
-# Datasets (reproducible via src/download_datasets.py + src/generate_splits.py)
-data/processed/
-data/processed_leaky_backup/
+# Datasets (reproducible via src/prepare_data.py)
 data/raw/
+data/processed_leaky_backup/
 
 # Colab download artifact (contains the 141MB checkpoint)
 results.zip
