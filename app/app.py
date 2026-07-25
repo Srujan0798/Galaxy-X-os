@@ -73,8 +73,22 @@ def _ensure_checkpoint(checkpoint_path: str = "checkpoints/best_model.pth") -> s
     p.parent.mkdir(parents=True, exist_ok=True)
     release_url = "https://github.com/Srujan0798/Galaxy-X-os/releases/download/v1.0/best_model.pth"
     st.info("Downloading checkpoint from Release (one-time, ~141 MB)...")
-    import urllib.request
-    urllib.request.urlretrieve(release_url, str(p))
+    try:
+        import ssl
+        import urllib.request
+        # Streamlit Cloud / some environments need unverified SSL for GitHub Releases
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        with urllib.request.urlopen(release_url, context=ctx, timeout=120) as response:
+            with open(p, "wb") as f:
+                f.write(response.read())
+    except Exception as exc:
+        p.unlink(missing_ok=True)
+        raise FileNotFoundError(
+            f"Could not auto-download checkpoint: {exc}. "
+            "Please download manually from https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0"
+        )
     return str(p)
 
 

@@ -31,7 +31,7 @@
 
 ## Quick Start (Demo)
 
-Requires **Python 3.10–3.12** (torch==2.4.1 has no wheel for 3.13+; use `pyenv` or `python3.11 -m venv .venv` if your system default is newer).
+Requires **Python 3.10–3.12** (use `pyenv` or `python3.11 -m venv .venv` if your system default is newer).
 
 Get the demo running in 3 steps:
 
@@ -49,6 +49,16 @@ streamlit run app/app.py
 # → Click a sample image or upload your own
 # → See: predicted class, confidence, bar chart, Grad-CAM, caption, OOD
 ```
+
+### One-click hosted demo (Streamlit Cloud)
+
+You can also deploy the app to **Streamlit Community Cloud** — it will auto-download the checkpoint on first launch:
+
+[![Deploy to Streamlit Cloud](https://img.shields.io/badge/Deploy-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://share.streamlit.io/deploy?repository=Srujan0798/Galaxy-X-os)
+
+After linking your GitHub repo, set the **Main file path** to `app/app.py`. The app downloads `best_model.pth` (~141 MB) from the v1.0 Release on first load.
+
+> Note: Streamlit Cloud has a 1 GB resource limit. The checkpoint + PyTorch stack fit comfortably.
 
 > **Verify the checkpoint** after download:
 > ```bash
