@@ -65,13 +65,26 @@ if _SRC_DIR not in sys.path:
 _manager = None
 
 
+def _ensure_checkpoint(checkpoint_path: str = "checkpoints/best_model.pth") -> str:
+    """Return existing checkpoint path, or auto-download from Release for hosted demos."""
+    p = Path(checkpoint_path)
+    if p.exists() and p.stat().st_size > 0:
+        return str(p)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    release_url = "https://github.com/Srujan0798/Galaxy-X-os/releases/download/v1.0/best_model.pth"
+    st.info("Downloading checkpoint from Release (one-time, ~141 MB)...")
+    import urllib.request
+    urllib.request.urlretrieve(release_url, str(p))
+    return str(p)
+
+
 def _get_manager(checkpoint_path: str = "checkpoints/best_model.pth"):
     global _manager
     if _manager is None:
         from inference import ModelManager
         from utils import get_device
         device = str(get_device())
-        _manager = ModelManager(checkpoint_path=checkpoint_path, device=device)
+        _manager = ModelManager(checkpoint_path=_ensure_checkpoint(checkpoint_path), device=device)
     return _manager
 
 
@@ -303,15 +316,15 @@ def main():
 
     try:
         manager = load_model()
-    except FileNotFoundError:
-        st.error("🚨 **Model checkpoint not found** at `checkpoints/best_model.pth`.")
+    except Exception as e:
+        st.error(f"🚨 **Model checkpoint not available**: {e}")
         st.markdown(
             "### 💾 Get a pre-trained checkpoint\n"
             "- [⬇️ Download best_model.pth (Release v1.0)]"
             "(https://github.com/Srujan0798/Galaxy-X-os/releases/download/v1.0/best_model.pth)\n"
             "- [📓 Train your own in Colab]"
             "(https://github.com/Srujan0798/Galaxy-X-os/blob/main/notebooks/Galaxy_X_Colab.ipynb)\n"
-            "\nor train locally: `python src/train.py`"
+            "\nor train locally: `python src/prepare_data.py && python src/train.py`"
         )
         render_footer()
         return
