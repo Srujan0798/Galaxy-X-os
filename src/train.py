@@ -260,11 +260,15 @@ def main():
         tb_writer.add_scalar("LR", lr_now, epoch)
 
         # Checkpoint
+        ckpt_name = f"best_model_{backbone}.pth"
         if val_m["accuracy"] > best_val_acc:
             best_val_acc = val_m["accuracy"]
             patience_ctr = 0
             save_checkpoint(model, optimizer, scheduler, epoch, best_val_acc, config,
-                           str(checkpoint_dir / "best_model.pth"))
+                           str(checkpoint_dir / ckpt_name))
+            # Also copy as best_model.pth for convenience
+            import shutil
+            shutil.copy2(str(checkpoint_dir / ckpt_name), str(checkpoint_dir / "best_model.pth"))
             logger.info(f"  *** New best model saved! (val_acc={best_val_acc:.4f}) ***")
         else:
             patience_ctr += 1
