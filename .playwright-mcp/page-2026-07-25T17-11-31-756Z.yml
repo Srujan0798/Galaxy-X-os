@@ -1,0 +1,4 @@
+- banner [ref=f1e4]:
+  - generic [ref=f1e7]:
+    - button "Deploy" [ref=f1e9] [cursor=pointer]
+    - button "Main menu" [ref=f1e13] [cursor=pointer]
