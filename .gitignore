@@ -87,3 +87,6 @@ data/raw/
 # Colab download artifact (contains the 141MB checkpoint)
 results.zip
 *.zip
+
+# Playwright MCP cache
+.playwright-mcp/
