@@ -123,102 +123,77 @@ def evaluate_standard(model, loader, device) -> EvaluationResults:
 
 def evaluate_tta(model, test_dataset, device, batch_size=32, num_workers=4, image_size=224,
                  tta_type: str = "standard") -> Dict:
-    """Test-Time Augmentation evaluation.
-    
-    tta_type options:
-    - 'standard': 6 augmentations (original + flip + brightness variants)
-    - 'advanced': 10-crop + multi-scale + rotation (30 augs)
-    - 'heavy': 10-crop x 3 scales x 4 rotations (120 augs)
+    """Standard 6× Test-Time Augmentation evaluation.
+
+    advanced/heavy modes are archived with attic/src-archive/tta.py and fall back
+    to the standard 6-aug pipeline.
     """
-    if tta_type == "advanced" or tta_type == "heavy":
-        tta_transforms = get_tta_transforms(image_size) if tta_type == "advanced" else get_tta_transforms_heavy(image_size)
-        logger.info(f"Running advanced TTA with {len(tta_transforms)} transforms...")
-        
-        all_logits_sum = None
-        count = 0
-        
-        for transform in tqdm(tta_transforms, desc="TTA transforms"):
-            loader = DataLoader(
-                TTADataset(test_dataset, transform),
-                batch_size=batch_size, shuffle=False,
-                num_workers=num_workers, pin_memory=True
+    if tta_type in ("advanced", "heavy"):
+        logger.warning(
+            "Advanced/heavy TTA requested but advanced TTA is archived "
+            "(attic/src-archive/tta.py). Falling back to standard 6× TTA."
+        )
+
+    import albumentations as A
+    from albumentations.pytorch import ToTensorV2
+
+    base = [
+        A.Resize(image_size, image_size),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2(),
+    ]
+    tta_transforms = [
+        A.Compose(base),
+        A.Compose([A.HorizontalFlip(p=1.0)] + base),
+        A.Compose([A.VerticalFlip(p=1.0)] + base),
+        A.Compose([A.RandomRotate90(p=1.0)] + base),
+        A.Compose([A.RandomBrightnessContrast(brightness_limit=(0.05, 0.1), contrast_limit=0, p=1.0)] + base),
+        A.Compose([A.RandomBrightnessContrast(brightness_limit=(-0.1, -0.05), contrast_limit=0, p=1.0)] + base),
+    ]
+
+    logger.info(f"Running standard TTA with {len(tta_transforms)} augmentations...")
+
+    all_tta_probs = []
+    with torch.no_grad():
+        for aug_idx, transform in enumerate(tta_transforms):
+            tta_ds = TTADataset(test_dataset, transform)
+            tta_loader = DataLoader(
+                tta_ds,
+                batch_size=batch_size,
+                shuffle=False,
+                num_workers=num_workers,
+                pin_memory=True,
             )
-            
-            batch_logits = []
-            for images, _ in loader:
+            probs_aug = []
+            for images, _ in tqdm(
+                tta_loader,
+                desc=f"TTA {aug_idx + 1}/{len(tta_transforms)}",
+                leave=False,
+            ):
                 images = images.to(device, non_blocking=True)
                 if isinstance(model, AstroEnsemble):
                     mean_logits, _, _, _ = model.predict_with_uncertainty(images)
+                    probs_aug.extend(F.softmax(mean_logits, dim=1).cpu().numpy())
                 else:
-                    with torch.no_grad():
-                        mean_logits = model(images)
-                batch_logits.append(mean_logits.cpu())
-            
-            all_logits = torch.cat(batch_logits, dim=0)
-            
-            if all_logits_sum is None:
-                all_logits_sum = all_logits
-            else:
-                all_logits_sum += all_logits
-            count += 1
-        
-        mean_logits = all_logits_sum / count
-        mean_probs = F.softmax(mean_logits, dim=1).numpy()
-        tta_preds = mean_probs.argmax(axis=1)
-        all_labels = np.array(test_dataset.labels)
-        
-        accuracy = accuracy_score(all_labels, tta_preds)
-        macro_f1_val = f1_score(all_labels, tta_preds, average="macro", zero_division=0)
-        
-        logger.info(f"Advanced TTA ({tta_type}): Acc={accuracy:.4f} | Macro F1={macro_f1_val:.4f}")
-        return {"accuracy": accuracy, "macro_f1": macro_f1_val, "predictions": tta_preds,
-                "labels": all_labels, "probabilities": mean_probs}
-    
-    else:
-        # Standard 6x TTA
-        import albumentations as A
-        from albumentations.pytorch import ToTensorV2
-        
-        base = [A.Resize(image_size, image_size), A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), ToTensorV2()]
-        
-        tta_transforms = [
-            A.Compose(base),
-            A.Compose([A.HorizontalFlip(p=1.0)] + base),
-            A.Compose([A.VerticalFlip(p=1.0)] + base),
-            A.Compose([A.RandomRotate90(p=1.0)] + base),
-            A.Compose([A.RandomBrightnessContrast(brightness_limit=(0.05, 0.1), contrast_limit=0, p=1.0)] + base),
-            A.Compose([A.RandomBrightnessContrast(brightness_limit=(-0.1, -0.05), contrast_limit=0, p=1.0)] + base),
-        ]
-        
-        logger.info(f"Running standard TTA with {len(tta_transforms)} augmentations...")
-        
-        all_tta_probs = []
-        with torch.no_grad():
-            for aug_idx, transform in enumerate(tta_transforms):
-                tta_ds = TTADataset(test_dataset, transform)
-                tta_loader = DataLoader(tta_ds, batch_size=batch_size, shuffle=False,
-                                        num_workers=num_workers, pin_memory=True)
-                probs_aug = []
-                for images, _ in tqdm(tta_loader, desc=f"TTA {aug_idx+1}/{len(tta_transforms)}", leave=False):
-                    images = images.to(device, non_blocking=True)
-                    if isinstance(model, AstroEnsemble):
-                        mean_logits, _, _, _ = model.predict_with_uncertainty(images)
-                        probs_aug.extend(F.softmax(mean_logits, dim=1).cpu().numpy())
-                    else:
-                        outputs = model(images)
-                        probs_aug.extend(F.softmax(outputs, dim=1).cpu().numpy())
-                all_tta_probs.append(np.array(probs_aug))
-        
-        mean_probs = np.mean(all_tta_probs, axis=0)
-        tta_preds = mean_probs.argmax(axis=1)
-        all_labels = np.array(test_dataset.labels)
-        
-        accuracy = accuracy_score(all_labels, tta_preds)
-        macro_f1_val = f1_score(all_labels, tta_preds, average="macro", zero_division=0)
-        
-        logger.info(f"Standard TTA: Acc={accuracy:.4f} | Macro F1={macro_f1_val:.4f}")
-        return {"accuracy": accuracy, "macro_f1": macro_f1_val, "predictions": tta_preds,
-                "labels": all_labels, "probabilities": mean_probs}
+                    outputs = model(images)
+                    probs_aug.extend(F.softmax(outputs, dim=1).cpu().numpy())
+            all_tta_probs.append(np.array(probs_aug))
+
+    mean_probs = np.mean(all_tta_probs, axis=0)
+    tta_preds = mean_probs.argmax(axis=1)
+    all_labels = np.array(test_dataset.labels)
+
+    accuracy = accuracy_score(all_labels, tta_preds)
+    macro_f1_val = f1_score(all_labels, tta_preds, average="macro", zero_division=0)
+
+    logger.info(f"Standard TTA: Acc={accuracy:.4f} | Macro F1={macro_f1_val:.4f}")
+    return {
+        "accuracy": accuracy,
+        "macro_f1": macro_f1_val,
+        "predictions": tta_preds,
+        "labels": all_labels,
+        "probabilities": mean_probs,
+    }
 
 
 class TTADataset(torch.utils.data.Dataset):

@@ -4,7 +4,6 @@ import numpy as np
 
 from src.bonus import (
     detect_anomaly,
-    localize_object,
     overlay_localization_bbox,
     render_localization_overlay,
 )

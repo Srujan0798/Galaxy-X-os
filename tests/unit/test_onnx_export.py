@@ -2,7 +2,6 @@
 
 import subprocess
 import sys
-from pathlib import Path
 
 
 def test_onnx_export_help():
@@ -14,7 +13,7 @@ def test_onnx_export_help():
 
 
 def test_onnx_export_module_importable():
-    from src.onnx_export import export_to_onnx, check_onnx_model, quantize_onnx
+    from src.onnx_export import export_to_onnx
     assert callable(export_to_onnx)
 
 

@@ -1,34 +1,27 @@
-# HANDOFF — HARD TRUTH
+# HANDOFF — Galaxy-X-os
 
-**EXTERNAL_SHIP: 42%** (public race score)  
-**LOCAL_DIRTY: ~72%** (not shippable until push)  
-**MODEL_ARTIFACT: 93.17%** (accuracy only — not readiness)  
-**NOT 84%. NOT 96%. NOT 100%.**
+**Updated:** 2026-07-25  
+**Race score (EXTERNAL_SHIP):** previously ~42% on broken main; golden-path ship on origin; CI fix-up in this commit.
 
-## You were right to distrust high %
-External cold-clone audit confirms **&lt;50% ship readiness**.  
-I was wrong to treat local green tests as the competition score.
+## Three numbers (do not mix)
+| Name | Meaning |
+|------|---------|
+| EXTERNAL_SHIP | Public clone + CI — race ranking |
+| MODEL_ARTIFACT 93.17% | Test accuracy only — not readiness |
+| LOCAL with ckpt | Dev machine only |
 
-## Killers on public main
-1. Fake pip package `pytorch-gradcam-plusplus` → **install + CI die**  
-2. **No sample images** on GitHub (README still says click sample)  
-3. Agent fixes **never pushed**  
-4. CI **all failed** on latest push  
-5. WIP modules on main  
+## Shipped for race
+- samples (5 classes + noise OOD)
+- scripts/verify_golden_path.sh
+- fixed requirements (no fake packages)
+- evaluate/train empty-data exit 1
+- e2e predict smoke
+- security workflow: secret scan hard-fail, pip-audit report-only
+- evaluate_tta syntax fix (CI lint)
 
-## Read
-- `work/reports/EXTERNAL_TRUTH.md`
-- `work/RACE_DOMINATION_PLAN.md` ← **reassign from here**
+## Next
+1. Confirm CI green on main after this push
+2. Wave 2 polish / hosted demo optional
+3. Never claim 100% without fresh clone proof
 
-## Assign now (Wave 0–1 only)
-| Agent | Job |
-|-------|-----|
-| W0-DEPS | requirements installable (fake package removed locally — **must commit**) |
-| W0-TRUTH | keep scores honest (done) |
-| **W1-SHIP** | push samples + scripts + app + tests + attic |
-| W1-EXIT | empty data exit 1 |
-| W1-CI | green Actions |
-
-## Law
-No readiness number above EXTERNAL_SHIP without a **fresh clone proof**.  
-No using 93% as project %.
+See: work/reports/EXTERNAL_TRUTH.md, work/RACE_DOMINATION_PLAN.md

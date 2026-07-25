@@ -47,7 +47,6 @@ def check_data_exists(data_dir: str = "data/processed") -> None:
         )
         print(msg, file=sys.stderr)
         sys.exit(1)
-        sys.exit(1)
 
 
 # ---------------------------------------------------------------------------

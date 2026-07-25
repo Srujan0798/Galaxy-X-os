@@ -53,6 +53,9 @@ results/*
 !results/per_class_metrics.png
 !results/confidence_distribution.png
 !results/gradcam/
+!results/gradcam/**
+!results/latency_bench.json
+!results/ARTIFACT_HASHES.md
 logs/*
 !logs/.gitkeep
 
