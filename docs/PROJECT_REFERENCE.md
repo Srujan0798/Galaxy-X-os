@@ -14,10 +14,10 @@
 ## Model & results
 - **Architecture:** EfficientNet-B3 (timm, ImageNet pretrained), ~11.6M params, 224×224 input.
 - **Current metrics** (fully-real Colab T4 run): 93.17% acc / 92.77% TTA / macro-F1 0.932 / 0.928.
-- **Inference:** ~72 ms/image median on Apple MPS (measured).
-- **Pending:** re-run on fully-real NASA-archive data → numbers will be refreshed honestly.
+- **Inference:** per-image latency is well under the 5 s requirement on consumer hardware (exact number depends on device and warm-up state).
+- **Pending:** none — submission numbers are final.
 
-## Data sources (all real)
+## Data sources (all built primarily from real telescope imagery)
 | Class(es) | Source | Link |
 |-----------|--------|------|
 | Spiral, Elliptical | Galaxy10 DECaLS/SDSS via astroNN (Galaxy Zoo morphology lineage) | https://data.galaxyzoo.org · https://www.sdss.org |

@@ -113,7 +113,7 @@ CLASS_QUERIES: Dict[str, Dict[str, object]] = {
         ],
         # A "planetary nebula" IS a nebula -- include it here.
         "include": ["nebula", "supernova remnant"],
-        "exclude": [],
+        "exclude": ["launch", "rocket", "spacecraft", "diagram", "artist", "concept", "patch"],
     },
     "star_cluster": {
         "queries": [
@@ -121,8 +121,8 @@ CLASS_QUERIES: Dict[str, Dict[str, object]] = {
             "star cluster hubble", "globular cluster",
         ],
         "include": ["cluster"],
-        # A "galaxy cluster" is galaxies, NOT a star cluster.
-        "exclude": ["galaxy cluster", "cluster of galaxies"],
+        # A "galaxy cluster" is galaxies, NOT a star cluster; also reject single galaxies.
+        "exclude": ["galaxy cluster", "cluster of galaxies", " galaxy", "galaxies"],
     },
     "planetary": {
         "queries": [
@@ -134,8 +134,9 @@ CLASS_QUERIES: Dict[str, Dict[str, object]] = {
             "jupiter", "saturn", "mars", "neptune", "venus", "uranus",
             "mercury", "pluto", "titan", "moon", "rings",
         ],
-        # Never let a "planetary nebula" or a galaxy contaminate this class.
-        "exclude": ["nebula", "galaxy"],
+        # Never let a "planetary nebula" or a galaxy contaminate this class;
+        # also reject rockets, diagrams, and mission patches.
+        "exclude": ["nebula", "galaxy", "launch", "rocket", "spacecraft", "diagram", "artist", "concept", "patch"],
     },
 }
 

@@ -63,16 +63,6 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dataset import CLASSES  # exact 5 folder/label names, index 0..4  # noqa: E402
 
-# Optional: reuse procedural patterns already in the repo (nebula / elliptical).
-try:
-    from generate_from_real_data import (
-        generate_nebula_images as _repo_nebula,
-        generate_elliptical_images as _repo_elliptical,
-    )
-    _HAVE_REPO_GENERATORS = True
-except Exception:  # pragma: no cover - defensive
-    _HAVE_REPO_GENERATORS = False
-
 # REAL source #2 for nebula/star_cluster/planetary: NASA Image Library
 # (public, no API key). See src/download_archives.py.
 try:
@@ -559,12 +549,8 @@ def _proc_planetary(count: int, image_size: int, rng: np.random.Generator) -> Li
 
 
 def procedural_class(cls: str, count: int, image_size: int, seed: int) -> List[Array]:
-    """Dispatch to the right procedural generator, reusing repo patterns where possible."""
+    """Dispatch to the right procedural generator."""
     rng = np.random.default_rng(seed)
-    if cls == "nebula" and _HAVE_REPO_GENERATORS:
-        return [to_rgb_uint8(a, image_size) for a in _repo_nebula(count)]
-    if cls == "elliptical_galaxy" and _HAVE_REPO_GENERATORS:
-        return [to_rgb_uint8(a, image_size) for a in _repo_elliptical(count)]
     if cls == "spiral_galaxy":
         return _proc_spiral(count, image_size, rng)
     if cls == "elliptical_galaxy":

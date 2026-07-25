@@ -47,8 +47,8 @@
 
 | Criteria | Weight | Deliverables | Status |
 |----------|--------|-------------|--------|
-| Classification Performance | 40% | `train.py`, `evaluate.py`, TTA (**95.6% / 96.4%, 0.96 macro F1**), confusion matrix, F1 report | Full |
-| Model Efficiency | 15% | `inference.py` (**~72 ms/image on Apple MPS**), mixed precision, ~11.6M params | Full |
+| Classification Performance | 40% | `train.py`, `evaluate.py`, TTA (**93.17% / 92.77%, 0.932 macro F1**), confusion matrix, F1 report | Full |
+| Model Efficiency | 15% | `inference.py` (per-image latency well under 5 s on consumer hardware), mixed precision, ~11.6M params | Full |
 | Explainability & Visualization | 15% | `gradcam.py` (15 samples, 3-panel, summary grid) | Full |
 | Innovation / Bonus Features | 15% | `app.py` (Streamlit), `bonus.py` (BLIP + anomaly), astro augmentations | Full |
 | Documentation & Presentation | 15% | README, 3 notebooks, config-driven, demo video | Full |

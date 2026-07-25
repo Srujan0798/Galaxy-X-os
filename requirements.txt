@@ -1,9 +1,17 @@
 # SCALE x ODYSSEY -- Python Dependencies
 
 # Core PyTorch (adjust CUDA version for your system)
+# NOTE: installed versions in this environment may differ; verify with `pytest tests/ -v`.
 torch==2.4.1
 torchvision==0.19.1
-torchaudio==2.4.1
+
+# Real galaxy data source (Galaxy10 DECaLS/SDSS)
+astroNN
+h5py
+
+# Optional Kaggle fallback datasets
+kagglehub
+kaggle
 
 # Model architectures
 timm==1.0.11

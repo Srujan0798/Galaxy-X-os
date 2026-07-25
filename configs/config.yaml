@@ -28,3 +28,5 @@ paths:
   results: "results"
   logs: "results/logs"
   gradcam_dir: "results/gradcam"
+
+eval_checkpoint: "checkpoints/best_model.pth"

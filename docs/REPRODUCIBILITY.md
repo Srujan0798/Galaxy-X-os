@@ -68,16 +68,19 @@ sha256sum checkpoints/best_model.pth       # Linux
 Full pinned list: `requirements.txt`. Lint: `ruff check src/ app/ tests/`.
 Tests: `pytest tests/ -v`.
 
-## Real data sources (all named in PROBLEM_STATEMENT.md)
+## Data sources and how they map to PROBLEM_STATEMENT.md
 
 | Source | Used for | Auth | Status |
 |---|---|---|---|
-| Galaxy10 DECaLS/SDSS (`astroNN`) | Spiral + Elliptical galaxy | None | Used |
-| ESA Hubble FITS-liberator | Nebula / Star Cluster / Planetary | None | Used (new) |
-| Kaggle `fedesoriano/deep-space-images` | Nebula / Star Cluster | Kaggle token | Used |
-| Kaggle `brsdincer/planetary-solar-system-objects` | Planetary | Kaggle token | Used |
-| Galaxy Zoo (data.galaxyzoo.org) | (Reference — Galaxy10 is its derivative) | None | Referenced |
-| NASA PDS / ESA PSA | (Reference for planetary mission archives) | None | Referenced |
+| Galaxy10 DECaLS/SDSS (`astroNN`) | Spiral + Elliptical galaxy | None | **Used** |
+| NASA Image Library (`images.nasa.gov`) | Nebula / Star Cluster / Planetary | None | **Used** |
+| Kaggle deep-space sets | Nebula / Star Cluster / Planetary | Kaggle token | Fallback only |
+| Galaxy Zoo (`data.galaxyzoo.org`) | Galaxy morphology lineage | None | Referenced (Galaxy10 is its ML-ready derivative) |
+| SDSS (`sdss.org`) | SDSS/DECaLS survey imaging | None | Referenced (Galaxy10 source) |
+| ESA Hubble FITS-liberator (`esahubble.org`) | Curated Hubble objects | None | Referenced, not auto-downloaded |
+| NASA Hubble mission portal (`science.nasa.gov/mission/hubble/`) | Hubble mission imagery | None | Referenced (NASA Image Library is the searchable API form) |
+| NASA PDS (`pds.nasa.gov`) | Planetary mission archives | None | Referenced, not implemented |
+| ESA PSA (`archives.esac.esa.int/psa/`) | Planetary mission archives | None | Referenced, not implemented |
 
 ## Cross-survey generalization / OOD
 

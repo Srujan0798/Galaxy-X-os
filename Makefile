@@ -6,13 +6,10 @@ install:
 	pip install -r requirements.txt
 
 split:
-	python src/generate_splits.py
+	python src/prepare_data.py
 
 train:
 	python src/train.py
-
-train-head:
-	python src/train_head.py
 
 evaluate:
 	python src/evaluate.py
@@ -31,7 +28,7 @@ lint:
 	mypy src/ || true
 
 validate:
-	python src/validate_dataset.py
+	python src/prepare_data.py --per-class 10
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

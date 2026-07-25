@@ -99,7 +99,7 @@ def save_checkpoint(
 
 def load_checkpoint(filepath: str, model, device: torch.device):
     """Load checkpoint and return state."""
-    checkpoint = torch.load(filepath, map_location=device, weights_only=False)
+    checkpoint = torch.load(filepath, map_location=device, weights_only=True)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
     model.eval()

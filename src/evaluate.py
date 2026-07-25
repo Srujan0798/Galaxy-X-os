@@ -9,6 +9,7 @@ confusion matrix, per-class metrics, and confidence analysis.
 
 import sys
 import json
+import time
 import logging
 from pathlib import Path
 
@@ -190,13 +191,28 @@ def plot_confidence_distribution(probs, save_path):
 # ---------------------------------------------------------------------------
 
 def main():
-    config = load_config()
-    device = get_device()
+    import argparse
+    parser = argparse.ArgumentParser(description="SCALE x ODYSSEY Evaluation")
+    parser.add_argument("--config", default="configs/config.yaml", help="Path to YAML config")
+    parser.add_argument("--checkpoint", default=None, help="Path to checkpoint (default from config eval_checkpoint)")
+    parser.add_argument("--device", default=None, choices=["cuda", "mps", "cpu"], help="Force device")
+    parser.add_argument("--output-dir", default=None, help="Directory to write results (default: timestamped subdir under results/)")
+    parser.add_argument("--overwrite", action="store_true", help="Write directly to results/ instead of a timestamped subdir")
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    device = torch.device(args.device) if args.device else get_device()
+
     results_dir = Path(config["paths"]["results"])
-    results_dir.mkdir(parents=True, exist_ok=True)
+    if args.overwrite:
+        results_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        tag = time.strftime("%Y%m%d_%H%M%S")
+        results_dir = results_dir / f"eval_{tag}"
+        results_dir.mkdir(parents=True, exist_ok=True)
 
     # Load model
-    checkpoint_path = config.get("eval_checkpoint", "checkpoints/best_model.pth")
+    checkpoint_path = args.checkpoint or config.get("eval_checkpoint", "checkpoints/best_model.pth")
     logger.info(f"Loading checkpoint: {checkpoint_path}")
 
     model_cfg = config["model"]

@@ -74,7 +74,7 @@ class ModelManager:
         if not os.path.exists(self.checkpoint_path):
             raise FileNotFoundError(f"Checkpoint not found: {self.checkpoint_path}")
 
-        checkpoint = torch.load(self.checkpoint_path, map_location=self.device, weights_only=False)
+        checkpoint = torch.load(self.checkpoint_path, map_location=self.device, weights_only=True)
         cfg = checkpoint.get("config", {})
         mc = cfg.get("model", {})
         self.image_size = cfg.get("data", {}).get("image_size", 224)
@@ -92,8 +92,10 @@ class ModelManager:
 
     @classmethod
     def singleton(cls, **kwargs) -> "ModelManager":
-        if cls._instance is None or kwargs.get("checkpoint_path") != getattr(cls._instance, "checkpoint_path", None):
+        key = tuple(sorted(kwargs.items()))
+        if cls._instance is None or key != getattr(cls._instance, "_cache_key", None):
             cls._instance = cls(**kwargs)
+            cls._instance._cache_key = key
         return cls._instance
 
     def _warmup(self):
@@ -214,9 +216,13 @@ if __name__ == "__main__":
         for name, prob in result.top_k[:3]:
             print(f"  {name:25s}: {prob:.4f}")
     elif image_path.is_dir():
-        files = [str(f) for f in image_path.glob("*") if f.suffix.lower() in (".jpg", ".jpeg", ".png")]
+        files = sorted(
+            str(f)
+            for pat in ("*.png", "*.jpg", "*.jpeg")
+            for f in image_path.rglob(pat)
+        )
         if not files:
-            logger.error("No images found")
+            logger.error("No images found (recursively) in %s", image_path)
             raise SystemExit(1)
         results = predict_batch(files, args.checkpoint, args.device, args.batch_size)
         print(f"\n{'='*60}\n{'Image':<30s} {'Prediction':<20s} {'Conf':>8s}\n{'-'*60}")

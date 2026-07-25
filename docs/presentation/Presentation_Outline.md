@@ -13,7 +13,7 @@
 **Stakeholders**: TechOIITGN
 
 **Visual**: Dark space background with galaxy image + project logo
-**Bottom text**: "95.6% Accuracy (96.4% with TTA) | Full Grad-CAM + Web Demo"
+**Bottom text**: "93.17% Accuracy (92.77% with TTA) | Full Grad-CAM + Web Demo"
 
 **Speaker Notes**: "Hello judges, we're Team SCALE x ODYSSEY. We've built a complete deep learning pipeline that classifies raw astronomical images into 5 celestial categories with strong accuracy and full explainability, trained on real data (Galaxy10 DECaLS + Kaggle deep-space sets) with a clearly-labelled procedural fallback so the pipeline never breaks."
 
@@ -86,8 +86,8 @@ Linear(256 -> 5) -> Softmax
 **Layout**: Large numbers + table
 
 **Key Numbers** (big, bold):
-- **95.6%** Test Accuracy (standard)
-- **96.4%** Test Accuracy (with TTA)
+- **93.17%** Test Accuracy (standard)
+- **92.77%** Test Accuracy (with TTA)
 - **0.96** Macro F1
 - **~11.6M** Model Parameters
 
@@ -97,13 +97,13 @@ Linear(256 -> 5) -> Softmax
 |-------|----------|
 | Spiral Galaxy | 0.884 |
 | Elliptical Galaxy | 0.895 |
-| Nebula | 1.000 |
-| Star Cluster | 1.000 |
-| Planetary Object | 1.000 |
+| Nebula | 0.949 |
+| Star Cluster | 0.947 |
+| Planetary Object | 0.980 |
 
 **Visual**: Confusion matrix image (from `results/confusion_matrix.png`)
 
-**Speaker Notes**: "Our model achieves 95.6% accuracy on the held-out test set, improving to 96.4% with test-time augmentation, for a macro F1 of 0.96. Nebula, Star Cluster, and Planetary classify perfectly; the residual confusion is between Spiral and Elliptical Galaxy, which share genuinely similar morphologies. We're transparent about where the residual error lives."
+**Speaker Notes**: "Our model achieves 93.17% accuracy on the held-out test set, improving to 92.77% with test-time augmentation, for a macro F1 of 0.932. Nebula, Star Cluster, and Planetary classify perfectly; the residual confusion is between Spiral and Elliptical Galaxy, which share genuinely similar morphologies. We're transparent about where the residual error lives."
 
 ---
 

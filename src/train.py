@@ -115,8 +115,28 @@ def setup_phase2_optimizer(model, lr, weight_decay):
 
 
 def main():
-    config = load_config()
+    import argparse
+    parser = argparse.ArgumentParser(description="SCALE x ODYSSEY Training")
+    parser.add_argument("--config", default="configs/config.yaml", help="Path to YAML config")
+    parser.add_argument("--epochs", type=int, default=None, help="Override number of epochs")
+    parser.add_argument("--lr", type=float, default=None, help="Override learning rate")
+    parser.add_argument("--batch-size", type=int, default=None, help="Override batch size")
+    parser.add_argument("--device", default=None, choices=["cuda", "mps", "cpu"], help="Force device")
+    parser.add_argument("--seed", type=int, default=None, help="Override random seed")
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    if args.epochs is not None:
+        config["training"]["num_epochs"] = args.epochs
+    if args.lr is not None:
+        config["training"]["lr"] = args.lr
+    if args.batch_size is not None:
+        config["training"]["batch_size"] = args.batch_size
+    if args.seed is not None:
+        config["seed"] = args.seed
+
     set_seed(config.get("seed", 42))
+    device = torch.device(args.device) if args.device else get_device()
 
     data_dir = config["data"]["processed_dir"]
     batch_size = config["training"].get("batch_size", 32)
@@ -135,7 +155,6 @@ def main():
     checkpoint_dir = Path(config["paths"]["checkpoints"])
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    device = get_device()
     logger = setup_logger(config["paths"]["logs"], f"{backbone}_{int(time.time())}")
 
     logger.info("=" * 70)

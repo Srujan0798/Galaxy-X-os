@@ -52,7 +52,7 @@ def load_model_for_gradcam(checkpoint_path: str, device: torch.device) -> nn.Mod
     if not os.path.exists(checkpoint_path):
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
     cfg = checkpoint.get("config", {}).get("model", {})
     model = AstroClassifier(cfg.get("num_classes", 5), cfg.get("backbone", "efficientnet_b3"),
                             pretrained=False, dropout=cfg.get("dropout", 0.4))
@@ -279,10 +279,22 @@ def _create_summary_grid(results: List[Dict], output_dir: str):
 # ---------------------------------------------------------------------------
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="SCALE x ODYSSEY Grad-CAM")
+    parser.add_argument("--config", default="configs/config.yaml", help="Path to YAML config")
+    parser.add_argument("--checkpoint", default=None, help="Path to checkpoint (default from config eval_checkpoint)")
+    parser.add_argument("--device", default=None, choices=["cuda", "mps", "cpu"], help="Force device")
+    parser.add_argument("--output-dir", default=None, help="Directory to write Grad-CAM outputs")
+    parser.add_argument("--num-samples", type=int, default=15, help="Number of samples to visualize")
+    args = parser.parse_args()
+
     from utils import load_config, get_device
-    config = load_config()
-    device = get_device()
-    model = load_model_for_gradcam(config.get("eval_checkpoint", "checkpoints/best_model.pth"), device)
+    config = load_config(args.config)
+    device = torch.device(args.device) if args.device else get_device()
+    checkpoint_path = args.checkpoint or config.get("eval_checkpoint", "checkpoints/best_model.pth")
+    output_dir = args.output_dir or config["paths"].get("gradcam_dir", "results/gradcam")
+
+    model = load_model_for_gradcam(checkpoint_path, device)
     test_dataset = AstroDataset(config["data"]["processed_dir"], "test", config["data"]["image_size"])
 
     logger.info("=" * 60)
@@ -290,8 +302,8 @@ def main():
     logger.info("=" * 60)
 
     visualize_predictions(model, test_dataset, device,
-                          output_dir=config["paths"].get("gradcam_dir", "results/gradcam"),
-                          num_samples=15,
+                          output_dir=output_dir,
+                          num_samples=args.num_samples,
                           image_size=config["data"]["image_size"])
 
     logger.info("=" * 60)

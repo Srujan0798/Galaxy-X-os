@@ -6,7 +6,7 @@
 
 ### The Project
 
-**SCALE x ODYSSEY** is a complete, end-to-end deep learning pipeline that classifies raw astronomical images into 5 celestial categories at **95.6% test accuracy** (96.4% with test-time augmentation, **0.96 macro F1**) with full explainability. It is a fully functional system, trained and evaluated on a 250-image held-out disjoint test set on real astronomical data (Galaxy10 DECaLS for the two galaxy classes, Kaggle deep-space sets + labelled procedural fallback for the rest — see `data/processed/DATA_MANIFEST.json`).
+**SCALE x ODYSSEY** is a complete, end-to-end deep learning pipeline that classifies raw astronomical images into 5 celestial categories at **93.17% test accuracy** (92.77% with test-time augmentation, **0.932 macro F1**) with full explainability. It is a fully functional system, trained and evaluated on a 250-image held-out disjoint test set on real astronomical data (Galaxy10 DECaLS for the two galaxy classes, NASA Image Library for the rest — see `data/processed/DATA_MANIFEST.json`).
 
 ### Why It Stands Out
 
@@ -36,7 +36,7 @@ Seed=42 everywhere, centralized YAML configuration, TensorBoard logging, 3 Jupyt
 
 | Criteria (Weight) | Deliverables |
 |-------------------|-------------|
-| Classification Performance (40%) | **95.6% accuracy (96.4% with TTA)**, **0.956 macro F1 (0.964 TTA)**, per-class F1, confusion matrix, classification report |
+| Classification Performance (40%) | **93.17% accuracy (92.77% with TTA)**, **0.932 macro F1 (0.928 TTA)**, per-class F1, confusion matrix, classification report |
 | Model Efficiency (15%) | ~11.6M params, mixed precision, batch processing, **~72 ms/image on Apple MPS** (faster on CUDA) |
 | Explainability (15%) | 15-sample 3-panel Grad-CAM, summary grid, confidence analysis |
 | Innovation/Bonus (15%) | Streamlit demo, BLIP captioning, anomaly detection, 8 astro augmentations |
@@ -44,7 +44,7 @@ Seed=42 everywhere, centralized YAML configuration, TensorBoard logging, 3 Jupyt
 
 ### The Bottom Line
 
-This submission addresses every requirement from pages 5-20 of the official starter guide. It goes beyond minimum requirements with clean, modular code, domain-specific innovations, and thorough documentation. The reported numbers are honest and reproducible: **95.6% test accuracy (96.4% with TTA)** on a balanced 250-image held-out disjoint test set. Nebula, Star Cluster, and Planetary classify perfectly (F1 = 1.000); the residual confusion is between Spiral and Elliptical Galaxy (~0.88–0.90 F1), which share genuinely similar morphologies — a real, explainable limitation of the domain, not a hidden one.
+This submission addresses every requirement from pages 5-20 of the official starter guide. It goes beyond minimum requirements with clean, modular code, domain-specific innovations, and thorough documentation. The reported numbers are honest and reproducible: **93.17% test accuracy (92.77% with TTA)** on a balanced 250-image held-out disjoint test set. Nebula, Star Cluster, and Planetary reach 0.949, 0.947, and 0.980 F1; the residual confusion is between Spiral and Elliptical Galaxy (~0.88–0.90 F1), which share genuinely similar morphologies — a real, explainable limitation of the domain, not a hidden one.
 
 ---
 

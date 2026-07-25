@@ -23,10 +23,7 @@ line-length = 120
 "src/gradcam.py" = ["E402"]
 "src/inference.py" = ["E402"]
 "src/train.py" = ["E402"]
-"src/train_head.py" = ["E402"]
-"src/validate_dataset.py" = ["E402"]
 "src/prepare_data.py" = ["E402"]
-"src/generate_from_real_data.py" = ["E741"]
 "app/app.py" = ["E402"]
 "src/download_archives.py" = ["E402"]
 

@@ -23,7 +23,7 @@
 
 ## Final Test Metrics
 
-Evaluated on the held-out **disjoint** test set (249 images, ~50 per class — none seen in training). Macro-averaged. All five classes trained on **real** telescope imagery (see `DATA_MANIFEST.json` below).
+Evaluated on the held-out **disjoint** test set (249 images, ~50 per class — none seen in training). Macro-averaged. All five classes built **primarily from real** telescope imagery (see `DATA_MANIFEST.json` below); the reported run used real Galaxy10 DECaLS images for the two galaxy classes and real NASA Image Library images for the other three.
 
 | Metric | Standard | + TTA (6× aug) |
 |---|---|---|
@@ -44,9 +44,9 @@ Evaluated on the held-out **disjoint** test set (249 images, ~50 per class — n
 
 *The two real galaxy-morphology classes — Spiral vs Elliptical — show the realistic ~0.88–0.90 F1 that captures genuine morphological ambiguity, which is the residual error. Nebula / Star Cluster / Planetary, now also trained on real NASA imagery (no longer the earlier clean procedural/Kaggle mix), show realistic 0.95–0.98 F1 — the small drop from the earlier perfect 1.000 reflects the genuine visual variety of real telescope images. TTA is within noise of standard here (the real test set is harder and more varied than the earlier procedural one).*
 
-See `data/processed/DATA_MANIFEST.json` for the honest per-class source breakdown (all five classes real: Galaxy10 DECaLS for the two galaxies, NASA Image Library for the other three).
+See `data/processed/DATA_MANIFEST.json` for the honest per-class source breakdown. The committed manifest reflects the real run (Galaxy10 DECaLS for the two galaxies, NASA Image Library for the other three); the small committed preview under `data/processed/` is not the full dataset.
 
-> **Reproducibility note:** the 93.17% / 92.77% numbers were produced on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` over a 50-epoch schedule on **fully-real** imagery — Galaxy10 DECaLS for the two galaxy classes and the NASA Image Library (no API key) for Nebula / Star Cluster / Planetary. The committed `data/processed/DATA_MANIFEST.json` is the manifest from this real run. To reproduce: run the Colab notebook, or `python src/prepare_data.py` (downloads real data, no key needed) then `python src/train.py`. See [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
+> **Reproducibility note:** the 93.17% / 92.77% numbers were produced on a **CUDA GPU (Google Colab, T4)** via `notebooks/Galaxy_X_Colab.ipynb` over a 50-epoch schedule on imagery built **primarily from real** telescope sources — Galaxy10 DECaLS for the two galaxy classes and the NASA Image Library (no API key) for Nebula / Star Cluster / Planetary. The committed `data/processed/DATA_MANIFEST.json` is the manifest from this real run. To reproduce: run the Colab notebook, or `python src/prepare_data.py` (downloads real data, no key needed) then `python src/train.py` on a GPU. See [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
 ## Confusion Matrix
 
@@ -54,8 +54,7 @@ See [`results/confusion_matrix.png`](results/confusion_matrix.png). Additional p
 
 ## Inference Time
 
-- **Measured ~72 ms per image (median; 118 ms mean) on Apple MPS** (EfficientNet-B3, batch=1, after warmup) — well under the 5 s requirement.
-- Faster on a CUDA GPU; code supports `torch.autocast("cuda")` for GPU deployment.
+- Per-image inference is well under the 5 s requirement on consumer hardware (Apple MPS / CUDA / CPU). Exact latency depends on batch size, device, and whether the model is already loaded; run `python src/inference.py <image> --batch-size 1` to measure on your hardware.
 - Streamlit demo runs in real time on consumer hardware.
 
 ## Setup Instructions
@@ -77,4 +76,4 @@ One-click alternative: open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_
 - **Full pipeline:** [`src/train.py`](src/train.py) — progressive unfreezing (backbone frozen epochs 1-3, full fine-tune from epoch 4) + OneCycleLR, AdamW (lr `3e-4`), batch 32, mixed precision (AMP), class weights, label smoothing.
 - **Config:** [`configs/config.yaml`](configs/config.yaml). Checkpoint: `checkpoints/best_model.pth`.
 
-> **Training note:** the reported model was trained to **93.17% / 92.77%** on a **CUDA GPU (Google Colab)** over a 50-epoch schedule via [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) on fully-real imagery (Galaxy10 DECaLS + NASA Image Library). Inference runs comfortably on consumer hardware — measured ~72 ms/image on an Apple-MPS MacBook.
+> **Training note:** the reported model was trained to **93.17% / 92.77%** on a **CUDA GPU (Google Colab)** over a 50-epoch schedule via [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) on imagery built primarily from real telescope sources (Galaxy10 DECaLS + NASA Image Library). Inference runs comfortably on consumer hardware.

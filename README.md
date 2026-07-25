@@ -13,7 +13,7 @@
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
 | **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-| **Key Results** | 93.17% test accuracy (92.77% with TTA) / 0.932 macro F1 on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes trained on **real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application |
+|   **Key Results** | 93.17% test accuracy (92.77% with TTA) / 0.932 macro F1 on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes built **primarily from real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application. **The reported run used the full 2,484-image real dataset; only a small preview of `data/processed/` is committed here. Reproduce via the Colab notebook or by running `prepare_data.py` + `train.py`. |
 
 ### 5-Class Taxonomy
 
@@ -45,11 +45,11 @@ python src/evaluate.py
 # 5. Generate Grad-CAM report (15 samples)
 python src/gradcam.py
 
-# 6. Fast inference test
-python src/inference.py data/processed/test/ --batch-size 16
+# 6. Fast inference test (use a flat image directory, or pass a single image)
+python src/inference.py data/processed/test/spiral_galaxy/ --batch-size 16
 
 # 7. Bonus: caption + anomaly detection
-python src/bonus.py data/processed/test/spiral_galaxy/sample.jpg
+python src/bonus.py data/processed/test/spiral_galaxy/spiral_galaxy_0000.png
 
 # 8. Launch web demo (record for submission!)
 streamlit run app/app.py
@@ -57,7 +57,7 @@ streamlit run app/app.py
 
 > **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
 >
-> **Trained weights:** `best_model.pth` (~141 MB) exceeds GitHub's 100 MB file limit, so it is **not** committed. Two ways to get it: (1) **reproduce** it exactly via the one-click Colab notebook or steps 2–3 above (~30 min on a free GPU) — this is the guaranteed path; (2) if published, download it from the [**v1.0 Release**](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0) and drop it in `checkpoints/`.
+> **Dataset & checkpoint note:** the reported 93.17% run used ~2,500 real images and a ~141 MB `best_model.pth`. Because GitHub's 100 MB file limit blocks the checkpoint and the full dataset, neither is committed. Two ways to get them: (1) **reproduce** them via the one-click Colab notebook or steps 2–3 above (~30 min on a free GPU) — this is the guaranteed path; (2) download the checkpoint from the [**v1.0 Release**](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0) and drop it in `checkpoints/`.
 >
 > **Verify the checkpoint** after download:
 > ```bash
@@ -111,7 +111,7 @@ Galaxy-X-os/
 | Component | Weight | Score | Evidence |
 |-----------|--------|-------|----------|
 | **Classification Performance** | 40% | — | 93.17% accuracy (92.77% with TTA), 0.932 macro F1 (0.928 TTA), confusion matrix, per-class F1, classification report |
-| **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), measured ~72 ms/image (median) on Apple MPS |
+|   **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), per-image inference well under the 5 s requirement (exact latency depends on hardware; see `REPORT.md`) |
 | **Explainability & Visualization** | 15% | — | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
 | **Innovation / Bonus Features** | 15% | — | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |
 | **Documentation & Presentation** | 15% | — | Full README, modular code, 3 Jupyter notebooks, reproducible configs, demo video |
@@ -128,11 +128,12 @@ python src/prepare_data.py
   - **Galaxy10 DECaLS / SDSS** via `astroNN` for Spiral + Elliptical galaxy imagery (no API key).
   - **NASA Image Library** ([images.nasa.gov](https://images.nasa.gov), no API key) for Nebula / Star Cluster / Planetary — real Hubble / Spitzer / JPL mission imagery retrieved by keyword with per-class purity filtering (see `src/download_archives.py`).
   - **Kaggle** deep-space sets (`fedesoriano/deep-space-images`, `brsdincer/planetary-solar-system-objects`) and a labelled procedural generator remain as fallbacks only.
+  - **Galaxy Zoo**, **SDSS**, **ESA Hubble**, **NASA Hubble**, **NASA PDS**, and **ESA PSA** are the public archives named in `PROBLEM_STATEMENT.md`. Galaxy10 (used here) is the curated ML-ready derivative of Galaxy Zoo + SDSS/DECaLS imaging; NASA Image Library is the searchable image API branch of NASA's Hubble/JPL imagery. ESA Hubble, NASA PDS, and ESA PSA are not auto-downloaded in this pipeline but are documented as related archives.
   - See `data/processed/DATA_MANIFEST.json` for the authoritative per-class real-vs-fallback record.
 - Balanced **disjoint** splits (verified by MD5 — no image in >1 split)
 - Class imbalance handling (oversampling + weighted loss)
 - Quality filtering (corrupted image removal)
-- 8 astronomy-specific augmentation transforms (cosmic ray simulation, vignetting, Poisson noise)
+- 3 custom astronomy-specific augmentation transforms (cosmic ray simulation, vignetting, Poisson noise) plus standard geometric/color augmentations
 
 **Key features in `src/dataset.py`:**
 - `AstroDataset`: PyTorch Dataset with `.samples` and `.labels` attributes

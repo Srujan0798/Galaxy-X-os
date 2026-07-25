@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-07-24
 
 ### Added
-- **Real GPU training run (Colab T4)** — final model: **95.6% accuracy, 96.4% TTA, 0.96 macro F1**
+- **Real GPU training run (Colab T4)** — final model: **93.17% accuracy, 92.77% TTA, 0.932 macro F1**
 - 15 Grad-CAM per-sample visualizations + summary grid (`results/gradcam/`)
 - Evaluation artifacts committed: `evaluation_results.json`, confusion matrix, per-class metrics, confidence distribution
 - `src/prepare_data.py` — real-first data pipeline with Kaggle credential support (KGAT_ token + legacy kaggle.json)
@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardcoded `config/config.yaml` path in `test_load_config`
 
 ### Changed
-- Documentation synced to real 95.6% accuracy results (`README.md`, `REPORT.md`, `SUBMISSION.md`)
+- Documentation synced to real 93.17% accuracy results (`README.md`, `REPORT.md`, `SUBMISSION.md`)
 - Cell 2 of Colab notebook restructured with clear banner comments
 - `.gitignore` updated to keep evaluation artifacts (PNGs + JSON + gradcam/)
 

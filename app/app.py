@@ -9,12 +9,11 @@ Matches official guide (page 17) with our beautiful UI:
 - Cached model loading for instant response
 """
 
-import os
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
-import torch
 import streamlit as st
 
 # ---------------------------------------------------------------------------
@@ -46,17 +45,43 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
-# Imports
+# Lazy Imports
 # ---------------------------------------------------------------------------
 
 PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "src"))
+_SRC_DIR = str(PROJECT_ROOT / "src")
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
 
-from inference import ModelManager, InferenceResult
-from gradcam import explain_image
-from dataset import CLASS_NAMES_DISPLAY
-from utils import get_device
-from bonus import generate_template_caption, detect_anomaly
+# Lazy-load heavy ML modules inside functions so importing this file for tests
+# does not immediately load PyTorch + BLIP + Grad-CAM.
+_manager = None
+
+
+def _get_manager(checkpoint_path: str = "checkpoints/best_model.pth"):
+    global _manager
+    if _manager is None:
+        from inference import ModelManager
+        from utils import get_device
+        device = str(get_device())
+        _manager = ModelManager(checkpoint_path=checkpoint_path, device=device)
+    return _manager
+
+
+@contextmanager
+def _temp_uploaded_file(uploaded):
+    suffix = Path(uploaded.name).suffix.lower()
+    if suffix not in (".jpg", ".jpeg", ".png"):
+        suffix = ".png"
+    with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
+        tmp.write(uploaded.getbuffer())
+        tmp.flush()
+        yield tmp.name
+
+
+def _class_names():
+    from dataset import CLASS_NAMES_DISPLAY
+    return CLASS_NAMES_DISPLAY
 
 
 # ---------------------------------------------------------------------------
@@ -65,8 +90,7 @@ from bonus import generate_template_caption, detect_anomaly
 
 @st.cache_resource(show_spinner="Loading model...")
 def load_model(checkpoint_path: str = "checkpoints/best_model.pth"):
-    device = str(get_device())  # CUDA > MPS > CPU
-    return ModelManager(checkpoint_path=checkpoint_path, device=device)
+    return _get_manager(checkpoint_path)
 
 
 # ---------------------------------------------------------------------------
@@ -81,6 +105,7 @@ def render_header():
 
 
 def render_sidebar():
+    from utils import get_device
     with st.sidebar:
         st.title("⚙️ Settings")
         st.subheader("Model")
@@ -90,12 +115,13 @@ def render_sidebar():
         icon = "🟢" if device_type in ("cuda", "mps") else "🟡"
         st.markdown(f"{icon} **Device:** {device}")
         if device_type == "cuda":
+            import torch
             st.markdown(f"📟 **GPU:** {torch.cuda.get_device_name(0)}")
         st.markdown("🧠 **Backbone:** EfficientNet-B3")
         st.markdown("📊 **Classes:** 5")
         st.markdown("---")
         st.subheader("📋 Class Reference")
-        for i, cls in enumerate(CLASS_NAMES_DISPLAY):
+        for i, cls in enumerate(_class_names()):
             st.markdown(f"{i+1}. {cls}")
         st.markdown("---")
         st.subheader("🔬 How to read the output")
@@ -117,7 +143,7 @@ def render_sidebar():
                     "run locally — no commercial APIs.")
 
 
-def render_prediction_result(result: InferenceResult):
+def render_prediction_result(result):
     st.markdown("---")
     st.subheader("🎯 Prediction Result")
     c1, c2, c3 = st.columns(3)
@@ -135,7 +161,7 @@ def render_prediction_result(result: InferenceResult):
                     f'<div class="metric-label">Inference Time</div></div>', unsafe_allow_html=True)
 
 
-def render_probability_chart(result: InferenceResult):
+def render_probability_chart(result):
     st.markdown("---")
     st.subheader("📊 Probability Distribution")
     import pandas as pd
@@ -147,6 +173,7 @@ def render_probability_chart(result: InferenceResult):
 
 
 def render_gradcam(image, manager):
+    from gradcam import explain_image
     st.markdown("---")
     st.subheader("🔥 Grad-CAM Explainability")
     st.caption("Heatmap shows regions the model focused on. Red = high importance.")
@@ -170,7 +197,8 @@ def render_gradcam(image, manager):
             st.info("Ensure grad-cam is installed: pip install grad-cam")
 
 
-def render_caption(image_path: str, result: InferenceResult):
+def render_caption(image_path: str, result):
+    from bonus import generate_template_caption
     st.markdown("---")
     st.subheader("📝 Auto-Generated Caption")
     st.caption("Offline template captioner — built from the predicted class, "
@@ -179,7 +207,8 @@ def render_caption(image_path: str, result: InferenceResult):
     st.success(cap["caption"])
 
 
-def render_anomaly(result: InferenceResult):
+def render_anomaly(result):
+    from bonus import detect_anomaly
     st.markdown("---")
     st.subheader("🛰️ Anomaly / Out-of-Distribution Check")
     st.caption("Softmax entropy + maximum-probability screening. Flags uncertain "
@@ -225,34 +254,22 @@ def main():
                                 type=["jpg", "jpeg", "png"])
 
     if uploaded is not None:
-        # Use a sanitized temp file to prevent path traversal via uploaded.name.
-        suffix = Path(uploaded.name).suffix.lower()
-        if suffix not in (".jpg", ".jpeg", ".png"):
-            suffix = ".png"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-            tmp.write(uploaded.getbuffer())
-            temp_path = tmp.name
+        with _temp_uploaded_file(uploaded) as temp_path:
+            left, right = st.columns([1, 1])
+            with left:
+                st.markdown("---")
+                st.subheader("🖼️ Uploaded Image")
+                st.image(temp_path, use_container_width=True)
 
-        left, right = st.columns([1, 1])
-        with left:
-            st.markdown("---")
-            st.subheader("🖼️ Uploaded Image")
-            st.image(temp_path, use_container_width=True)
+            with right:
+                with st.spinner("Analyzing..."):
+                    result = manager.predict(temp_path)
+                render_prediction_result(result)
+                render_probability_chart(result)
 
-        with right:
-            with st.spinner("Analyzing..."):
-                result = manager.predict(temp_path)
-            render_prediction_result(result)
-            render_probability_chart(result)
-
-        render_gradcam(temp_path, manager)
-        render_caption(temp_path, result)
-        render_anomaly(result)
-
-        try:
-            os.remove(temp_path)
-        except OSError:
-            pass
+            render_gradcam(temp_path, manager)
+            render_caption(temp_path, result)
+            render_anomaly(result)
     else:
         st.info("👆 Upload an astronomical image to begin classification.")
         st.markdown("---")

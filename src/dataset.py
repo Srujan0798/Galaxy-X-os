@@ -208,7 +208,7 @@ def get_loaders(data_dir: str, batch_size: int = 32, num_workers: int = 4, image
     test_ds = AstroDataset(data_dir, "test", image_size)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=True, drop_last=True)
+                              num_workers=num_workers, pin_memory=True, drop_last=False)
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
                             num_workers=num_workers, pin_memory=True)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False,

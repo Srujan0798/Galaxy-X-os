@@ -88,7 +88,7 @@ cat results/evaluation_results.json
 Show the accuracy numbers, per-class F1 scores, and TTA improvement.
 
 **Narration**:
-"On the held-out test set, our model achieves 95.6% accuracy with standard evaluation and 96.4% with test-time augmentation, for a macro F1 of 0.96. Nebula, Star Cluster, and Planetary classify perfectly; the residual confusion is between Spiral and Elliptical galaxies, which share genuinely similar morphologies."
+"On the held-out test set, our model achieves 93.17% accuracy with standard evaluation and 92.77% with test-time augmentation, for a macro F1 of 0.932. Nebula, Star Cluster, and Planetary reach 0.949, 0.947, and 0.980 F1; the residual confusion is between Spiral and Elliptical galaxies, which share genuinely similar morphologies."
 
 ---
 
