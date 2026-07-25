@@ -9,7 +9,7 @@ data:
   num_workers: 4
 
 model:
-  backbone: "convnext_base"  # Primary backbone: convnext_base, swin_base, efficientnet_b3, vit_base
+  backbone: "efficientnet_b3"  # Primary backbone (matches best_model.pth checkpoint)
   num_classes: 5
   dropout: 0.4
 

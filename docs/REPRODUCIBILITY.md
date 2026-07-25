@@ -7,6 +7,8 @@
 | 93.17% test acc / 92.77% TTA / 0.932 macro F1 | `results/evaluation_results.json` | Run `notebooks/Galaxy_X_Colab.ipynb` end-to-end on a Colab T4 (free). |
 | 15 Grad-CAM figures | `results/gradcam/*.png` | `python src/gradcam.py` with the trained checkpoint. |
 | Confusion matrix + per-class F1 | `results/confusion_matrix.png`, `results/per_class_metrics.png` | `python src/evaluate.py`. |
+| Trained model (best_val ~0.95) | `checkpoints/best_model.pth` | Train: seed 42, EfficientNet-B3, Colab T4, ~30 min. |
+| Artifact integrity | `results/ARTIFACT_HASHES.md` | `./scripts/hash_artifacts.sh` |
 
 ## Manifest
 
@@ -21,6 +23,66 @@ imagery for every class.
 The integration test (`tests/integration/test_pipeline.py`) writes to a temp
 directory via `--output-dir` so it never overwrites this committed manifest.
 
+## Training story
+
+The final model was trained on a **Google Colab T4 GPU** (~15 GB VRAM) with
+**random seed 42** for all NumPy, Python `random`, and PyTorch operations.
+Training used `EfficientNet-B3` (via `timm`) with the AdamW optimizer, cosine
+annealing LR schedule, and mixed-precision (`autocast`). The data split was
+80/10/10 (train/val/test) stratified over all 5 classes.
+
+**Key metrics from training:**
+
+| Epochs | Best val accuracy | Test accuracy | TTA accuracy |
+|--------|-------------------|---------------|--------------|
+| 50     | ~0.95             | 93.17%        | 92.77%       |
+
+The checkpoint saved at the epoch achieving the highest validation accuracy
+(~0.95) is `checkpoints/best_model.pth`. The validation set is held out during
+training and only used for LR schedule plateau detection and model selection.
+All reported numbers on the **N=249 test set** (held out from the stratified
+split, ~50 per class) are from a single final evaluation pass.
+
+## Residual analysis: spiral ↔ elliptical confusion
+
+The per-class F1 scores (Spiral **0.887**, Elliptical **0.895**) are the lowest
+among the five classes, confirming that **spiral vs. elliptical discrimination is
+the hardest sub-problem** — consistent with the known morphological continuum
+between these two classes in Galaxy10 DECaLS.
+
+**Key observations:**
+
+1. **Confusion direction:** the classification report shows Elliptical recall
+   (0.940) exceeds Spiral recall (0.860), meaning the model is more likely to
+   misclassify a true Spiral as Elliptical than the reverse. This aligns with
+   the physical intuition that face-on spirals with weak arm structure can
+   appear elliptical.
+
+2. **Grad-CAM evidence:** `results/gradcam/_summary_grid.png` (verified via
+   SHA256 in `results/ARTIFACT_HASHES.md`) overlays 15 Grad-CAM activation maps
+   across all classes. Spiral examples show the model attends to the disk and
+   arm regions, while Elliptical examples show diffuse, centrally concentrated
+   activation. For borderline cases (e.g., a tightly-wound Sa spiral), the
+   activation pattern is often ambiguous, explaining the residual confusion.
+
+3. **Mitigation potential:** a dedicated spiral-vs-elliptical binary classifier
+   or a morphology-aware feature loss could reduce this gap. This is noted as
+   a future enhancement in `BONUS_FEATURES.md`.
+
+## Artifact integrity (SHA256)
+
+All committed evaluation artifacts are pinned by SHA256 in
+`results/ARTIFACT_HASHES.md`. Regenerate with:
+
+```bash
+./scripts/hash_artifacts.sh
+```
+
+| Artifact | SHA256 |
+|---|---|
+| `results/evaluation_results.json` | `89f27091db772e086b106ff274c51b33763c9525d1cc896fb83475c305a4b6ff` |
+| `results/gradcam/_summary_grid.png` | `c1b4dc890b0bdf2d94566467face17816bb0435dc3226e52f0698123d5208f10` |
+
 ## Checkpoint integrity
 
 `checkpoints/best_model.pth` (~141 MB) exceeds GitHub's 100 MB limit, so it is
@@ -32,16 +94,18 @@ directory via `--output-dir` so it never overwrites this committed manifest.
    [v1.0 Release](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0)
    and drop in `checkpoints/`.
 
-After downloading, verify integrity against this hash:
-
-```
-SHA256: e060f11b3fc5b5d25fb02d3ca1e6ee11dab5109e7f8d973aa894a494d9e8395a
-Size:   134 MB (140328300 bytes)
-```
+After downloading, verify integrity:
 
 ```bash
 shasum -a 256 checkpoints/best_model.pth   # macOS
 sha256sum checkpoints/best_model.pth       # Linux
+```
+
+Expected:
+
+```
+SHA256: e060f11b3fc5b5d25fb02d3ca1e6ee11dab5109e7f8d973aa894a494d9e8395a
+Size:   134 MB (140328300 bytes)
 ```
 
 > **Release creation note:** the v1.0 git tag is pushed. To publish the

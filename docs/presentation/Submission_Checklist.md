@@ -6,7 +6,7 @@
 
 | # | Requirement | File/Location | Status |
 |---|------------|---------------|--------|
-| 1 | Project folder structure matching guide (page 5) | `scale_odyssey/` | Complete |
+| 1 | Project folder structure matching guide (page 5) | `Galaxy-X-os/` | Complete |
 | 2 | `src/dataset.py` -- PyTorch Dataset class (page 8-9) | `src/dataset.py` | Complete |
 | 3 | `src/model.py` -- Model architecture (page 10) | `src/model.py` | Complete |
 | 4 | `src/train.py` -- Training script (page 11-12) | `src/train.py` | Complete |
@@ -47,17 +47,17 @@
 
 | Criteria | Weight | Deliverables | Status |
 |----------|--------|-------------|--------|
-| Classification Performance | 40% | `train.py`, `evaluate.py`, TTA (**93.17% / 92.77%, 0.932 macro F1**), confusion matrix, F1 report | Full |
+| Classification Performance | 40% | `train.py`, `evaluate.py`, TTA (**93.17% / 92.77%, 0.932 macro F1**), confusion matrix, F1 report | Present — see SCOREBOARD |
 | Model Efficiency | 15% | `inference.py` (per-image latency well under 5 s on consumer hardware), mixed precision, ~11.6M params | Full |
 | Explainability & Visualization | 15% | `gradcam.py` (15 samples, 3-panel, summary grid) | Full |
-| Innovation / Bonus Features | 15% | `app.py` (Streamlit), `bonus.py` (BLIP + anomaly), astro augmentations | Full |
-| Documentation & Presentation | 15% | README, 3 notebooks, config-driven, demo video | Full |
+| Innovation / Bonus Features | 15% | `app.py` (Streamlit), `bonus.py` (BLIP + anomaly), astro augmentations | Present — see SCOREBOARD |
+| Documentation & Presentation | 15% | README, 3 notebooks, config-driven, demo video | Present — see SCOREBOARD |
 
 ### Submission Package
 
 ```bash
 # Final zip structure:
-scale_odyssey.zip
+Galaxy-X-os.zip
 ├── src/             (8 Python modules)
 ├── app/             (Streamlit app)
 ├── notebooks/       (3 Jupyter notebooks)
@@ -73,7 +73,7 @@ scale_odyssey.zip
 ### Quick Verification Commands
 
 ```bash
-cd scale_odyssey && conda activate scale_odyssey
+cd Galaxy-X-os
 
 # Generate all outputs
 python src/train.py

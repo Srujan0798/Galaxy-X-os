@@ -36,8 +36,7 @@ from PIL import Image
 
 from dataset import AstroDataset, CLASS_NAMES_DISPLAY  # noqa: E402
 from model import AstroClassifier, AstroEnsemble, DEFAULT_ENSEMBLE_CONFIG  # noqa: E402
-from utils import load_config, compute_metrics, get_device  # noqa: E402
-from tta import get_tta_transforms, get_tta_transforms_heavy  # noqa: E402
+from utils import load_config, compute_metrics, get_device, check_data_exists  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -405,6 +404,7 @@ def main():
     args = parser.parse_args()
 
     config = load_config(args.config)
+    check_data_exists(config["data"]["processed_dir"])
     device = torch.device(args.device) if args.device else get_device()
     
     logger.info(f"Device: {device}")

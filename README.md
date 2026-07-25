@@ -5,6 +5,8 @@
 > Deep learning model for classifying raw astronomical images into 5 celestial categories.
 > **TechOIITGN Hackathon Submission** | **93.17% test accuracy (92.77% with TTA, 0.93 macro F1)** on imagery built primarily from real telescope sources | **Grad-CAM explainability + Web Demo**
 
+**Status:** Demo: local Streamlit + samples | Metrics: Colab artifact 93.17% (see results/) | Scoreboard: docs/SCOREBOARD.md
+
 ---
 
 ## Project Overview

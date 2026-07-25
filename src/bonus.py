@@ -525,6 +525,34 @@ def _load_model_for_bonus(checkpoint_path: str):
     return _load_model_for_bonus._cache[checkpoint_path]
 
 
+def overlay_localization_bbox(
+    image: "np.ndarray",
+    cam_overlay: "np.ndarray",
+    threshold: float = 0.30,
+    color=(0, 255, 0),
+    thickness: int = 3,
+) -> Dict:
+    """
+    Draw the localization bounding box on an image from a Grad-CAM overlay.
+
+    Uses _cam_array_from_overlay + localize_object to extract the bbox, then
+    render_localization_overlay to draw it.  Returns a dict with 'overlay'
+    (the annotated image), 'bbox', 'area_frac', and 'threshold'.
+    """
+    from numpy import asarray
+    overlay_arr = asarray(cam_overlay)
+    heatmap = _cam_array_from_overlay(overlay_arr)
+    loc = localize_object(heatmap, threshold=threshold)
+    if loc["bbox"] is None:
+        return {"overlay": image, "bbox": None, "area_frac": 0.0,
+                "threshold": threshold}
+    annotated = render_localization_overlay(
+        image, overlay_arr, loc["bbox"], color=color, thickness=thickness
+    )
+    return {"overlay": annotated, "bbox": loc["bbox"],
+            "area_frac": loc["area_frac"], "threshold": threshold}
+
+
 def _cam_array_from_overlay(overlay: "np.ndarray") -> "np.ndarray":
     """Best-effort recover a 2-D activation map from a CAM overlay image.
 

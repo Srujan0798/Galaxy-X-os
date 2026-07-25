@@ -32,7 +32,7 @@ from tqdm import tqdm
 
 from dataset import get_loaders  # noqa: E402
 from model import AstroClassifier  # noqa: E402
-from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device  # noqa: E402
+from utils import load_config, load_class_weights, save_checkpoint, setup_logger, set_seed, compute_metrics, get_device, check_data_exists  # noqa: E402
 
 
 def train_one_epoch(model, loader, optimizer, criterion, scaler, device, use_amp, scheduler=None):
@@ -139,6 +139,7 @@ def main():
     device = torch.device(args.device) if args.device else get_device()
 
     data_dir = config["data"]["processed_dir"]
+    check_data_exists(data_dir)
     batch_size = config["training"].get("batch_size", 32)
     num_epochs = config["training"]["num_epochs"]
     lr = config["training"]["lr"]

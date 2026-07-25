@@ -1,3 +1,6 @@
+# Galaxy-X-os docker-compose
+# Requires: checkpoints/ with best_model.pth, data/ with processed/ dataset
+# Optional: data/samples/ for demo without full dataset
 version: '3.8'
 
 services:

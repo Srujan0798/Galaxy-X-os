@@ -289,8 +289,9 @@ def main():
     parser.add_argument("--num-samples", type=int, default=15, help="Number of samples to visualize")
     args = parser.parse_args()
 
-    from utils import load_config, get_device
+    from utils import load_config, get_device, check_data_exists
     config = load_config(args.config)
+    check_data_exists(config["data"]["processed_dir"])
     device = torch.device(args.device) if args.device else get_device()
     checkpoint_path = args.checkpoint or config.get("eval_checkpoint", "checkpoints/best_model.pth")
     if args.output_dir:

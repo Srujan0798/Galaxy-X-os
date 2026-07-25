@@ -227,3 +227,30 @@ def benchmark_onnx(onnx_path: str, input_shape: Tuple[int, ...] = (1, 3, 224, 22
         return {"error": "onnxruntime not installed"}
     except Exception as e:
         return {"error": str(e)}
+
+
+def main():
+    """CLI entry: export model to ONNX."""
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="SCALE x ODYSSEY -- ONNX Export + Quantization"
+    )
+    parser.add_argument("--checkpoint", default="checkpoints/best_model.pth",
+                        help="Path to .pth checkpoint")
+    parser.add_argument("--output-dir", default="exports",
+                        help="Output directory for ONNX files")
+    parser.add_argument("--input-shape", default="1,3,224,224",
+                        help="Input shape as B,C,H,W (default 1,3,224,224)")
+    parser.add_argument("--skip-quantize", action="store_true",
+                        help="Skip FP16/INT8 quantization")
+    args = parser.parse_args()
+
+    shape = tuple(int(x) for x in args.input_shape.split(","))
+    cfg = {"backbone": "efficientnet_b3", "checkpoint_path": args.checkpoint}
+
+    result = export_model_pipeline(cfg, args.output_dir, shape)
+    print(f"\nONNX export results: {result}")
+
+
+if __name__ == "__main__":
+    main()

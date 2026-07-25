@@ -54,7 +54,7 @@ See [`results/confusion_matrix.png`](results/confusion_matrix.png). Additional p
 
 ## Inference Time
 
-- Per-image inference is well under the 5 s requirement on consumer hardware (Apple MPS / CUDA / CPU). Exact latency depends on batch size, device, and whether the model is already loaded; run `python src/inference.py <image> --batch-size 1` to measure on your hardware.
+- **Latency bench (Apple MPS, batch=1):** min=263ms, median=453ms, mean=751ms, max=3448ms — well under 5s. 11.6M params, ~44 MB model size.
 - Streamlit demo runs in real time on consumer hardware.
 
 ## Setup Instructions

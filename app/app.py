@@ -42,6 +42,12 @@ st.markdown("""
 .metric-label { font-size: 0.9rem; opacity: 0.9; }
 .footer { text-align: center; color: #94a3b8; font-size: 0.8rem;
     margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
+.sample-card { border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 0.8rem; background: #f8fafc; text-align: center;
+    margin-bottom: 1rem; transition: box-shadow 0.2s; }
+.sample-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.sample-title { font-weight: 600; font-size: 1.05rem;
+    margin-bottom: 0.3rem; color: #1e293b; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -171,10 +177,15 @@ def render_prediction_result(result):
         st.markdown(f'<div class="metric-card"><div class="metric-value">{result.class_name}</div>'
                     f'<div class="metric-label">Predicted Class</div></div>', unsafe_allow_html=True)
     with c2:
-        color = "#22c55e" if result.confidence > 0.8 else "#f59e0b" if result.confidence > 0.5 else "#ef4444"
+        if result.confidence > 0.8:
+            color, label = "#22c55e", "High"
+        elif result.confidence > 0.5:
+            color, label = "#f59e0b", "Medium"
+        else:
+            color, label = "#ef4444", "Low"
         st.markdown(f'<div class="metric-card" style="background: {color};">'
                     f'<div class="metric-value">{result.confidence:.1%}</div>'
-                    f'<div class="metric-label">Confidence</div></div>', unsafe_allow_html=True)
+                    f'<div class="metric-label">Confidence — {label}</div></div>', unsafe_allow_html=True)
     with c3:
         st.markdown(f'<div class="metric-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">'
                     f'<div class="metric-value">{result.inference_time_ms:.0f}ms</div>'
@@ -212,9 +223,37 @@ def render_gradcam(image, manager):
                 st.markdown("**True-Class CAM** (for comparison)")
                 st.image(result["true_cam"], use_container_width=True)
             st.info(f"Model focused on highlighted regions to classify as **{result['pred_class']}**.")
+            return result
         except Exception as e:
             st.error(f"Grad-CAM failed: {e}")
             st.info("Ensure grad-cam is installed: pip install grad-cam")
+            return None
+
+
+def render_localization(image_path, gradcam_result, key_suffix=""):
+    if gradcam_result is None:
+        return
+    show_loc = st.checkbox("📍 Show localization bounding box",
+                           key=f"loc_{key_suffix or image_path}")
+    if not show_loc:
+        return
+    from bonus import overlay_localization_bbox
+    import numpy as np
+    from PIL import Image
+    with st.spinner("Computing bounding box..."):
+        try:
+            img = np.array(Image.open(image_path).convert("RGB"))
+            loc_result = overlay_localization_bbox(
+                img, np.asarray(gradcam_result["predicted_cam"])
+            )
+            if loc_result["bbox"] is not None:
+                st.image(loc_result["overlay"], use_container_width=True,
+                         caption=f"Localization bbox (area: {loc_result['area_frac']:.1%} of image)")
+                st.caption("Pseudo-bounding box derived from Grad-CAM activation threshold")
+            else:
+                st.info("No salient region detected above threshold.")
+        except Exception as e:
+            st.error(f"Localization failed: {e}")
 
 
 def render_caption(image_path: str, result):
@@ -265,8 +304,15 @@ def main():
     try:
         manager = load_model()
     except FileNotFoundError:
-        st.error("⚠️ Model checkpoint not found at `checkpoints/best_model.pth`. "
-                 "Train first: `python src/train.py`")
+        st.error("🚨 **Model checkpoint not found** at `checkpoints/best_model.pth`.")
+        st.markdown(
+            "### 💾 Get a pre-trained checkpoint\n"
+            "- [⬇️ Download best_model.pth (Release v1.0)]"
+            "(https://github.com/Srujan0798/Galaxy-X-os/releases/download/v1.0/best_model.pth)\n"
+            "- [📓 Train your own in Colab]"
+            "(https://github.com/Srujan0798/Galaxy-X-os/blob/main/notebooks/Galaxy_X_Colab.ipynb)\n"
+            "\nor train locally: `python src/train.py`"
+        )
         render_footer()
         return
 
@@ -294,33 +340,67 @@ def main():
                     result = manager.predict(temp_path)
                 render_prediction_result(result)
                 render_probability_chart(result)
-            render_gradcam(temp_path, manager)
+            gradcam_result = render_gradcam(temp_path, manager)
+            render_localization(temp_path, gradcam_result, key_suffix="upload")
             render_caption(temp_path, result)
             render_anomaly(result)
     elif samples:
         st.markdown("---")
         st.subheader("📸 Try a Sample")
         st.caption("Click a class below to load a demo image and run the full prediction + Grad-CAM pipeline.")
-        cols = st.columns(len(samples))
-        for col, (cls_name, paths) in zip(cols, sorted(samples.items())):
-            with col:
-                display = display_names.get(cls_name, cls_name)
-                st.markdown(f"**{display}**")
-                st.image(str(paths[0]), use_container_width=True)
-                if st.button(f"Try {display}", key=f"btn_{cls_name}", use_container_width=True):
-                    st.markdown("---")
-                    st.subheader("🖼️ Sample Image")
-                    left, right = st.columns([1, 1])
-                    with left:
-                        st.image(str(paths[0]), use_container_width=True)
-                    with right:
-                        with st.spinner("Analyzing..."):
-                            result = manager.predict(str(paths[0]))
-                        render_prediction_result(result)
-                        render_probability_chart(result)
-                    render_gradcam(str(paths[0]), manager)
-                    render_caption(str(paths[0]), result)
-                    render_anomaly(result)
+        items = sorted(samples.items())
+        for i in range(0, len(items), 3):
+            row = items[i:i+3]
+            cols = st.columns(len(row))
+            for col, (cls_name, paths) in zip(cols, row):
+                with col:
+                    display = display_names.get(cls_name, cls_name)
+                    st.markdown(f'<div class="sample-card">'
+                                f'<p class="sample-title">{display}</p>', unsafe_allow_html=True)
+                    st.image(str(paths[0]), use_container_width=True)
+                    if st.button(f"Try {display}", key=f"btn_{cls_name}", use_container_width=True):
+                        st.markdown("---")
+                        st.subheader("🖼️ Sample Image")
+                        left, right = st.columns([1, 1])
+                        with left:
+                            st.image(str(paths[0]), use_container_width=True)
+                        with right:
+                            with st.spinner("Analyzing..."):
+                                result = manager.predict(str(paths[0]))
+                            render_prediction_result(result)
+                            render_probability_chart(result)
+                        gc_result = render_gradcam(str(paths[0]), manager)
+                        render_localization(str(paths[0]), gc_result, key_suffix=str(paths[0]))
+                        render_caption(str(paths[0]), result)
+                        render_anomaly(result)
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+        # ------------------------------------------------------------------
+        # OOD Demo: try noise sample (inside elif samples)
+        # ------------------------------------------------------------------
+        noise_dir = PROJECT_ROOT / "data" / "samples" / "noise"
+        noise_images = sorted(noise_dir.glob("*.png")) + sorted(noise_dir.glob("*.jpg")) if noise_dir.exists() else []
+        if noise_images:
+            st.markdown("---")
+            st.subheader("🧪 OOD / Anomaly Detection Demo")
+            st.caption("Click below to test the model on **synthetic random noise** (out-of-distribution). "
+                       "The anomaly detector should flag this as a potential OOD/rare object.")
+            if st.button("🌀 Try noise sample", key="btn_noise", use_container_width=True):
+                noise_path = str(noise_images[0])
+                st.markdown("---")
+                st.subheader("🖼️ Noise Image")
+                left, right = st.columns([1, 1])
+                with left:
+                    st.image(noise_path, use_container_width=True)
+                with right:
+                    with st.spinner("Analyzing..."):
+                        result = manager.predict(noise_path)
+                    render_prediction_result(result)
+                    render_probability_chart(result)
+                gc_result = render_gradcam(noise_path, manager)
+                render_localization(noise_path, gc_result, key_suffix="noise")
+                render_caption(noise_path, result)
+                render_anomaly(result)
     else:
         st.info("👆 Upload an astronomical image to begin classification.")
 

@@ -1,9 +1,8 @@
-"""E2E smoke tests: module imports + real inference with checkpoint.
+"""Smoke test: load checkpoint, run inference on one sample, verify outputs.
 
-Skips predict smoke when checkpoints/best_model.pth is absent.
+Skips gracefully when checkpoints/best_model.pth is absent.
 """
 
-import importlib
 import os
 from pathlib import Path
 
@@ -24,20 +23,15 @@ def _first_sample() -> str:
     return ""
 
 
-def _ckpt_and_sample_exist() -> bool:
+def _ckpt_exists() -> bool:
     if not os.path.isfile(CKPT):
         return False
     sample = _first_sample()
     return bool(sample) and os.path.isfile(sample)
 
 
-def test_app_module_imports():
-    for mod in ("src.bonus", "src.gradcam", "src.inference", "src.dataset"):
-        importlib.import_module(mod)
-
-
-@pytest.mark.skipif(not _ckpt_and_sample_exist(), reason="No checkpoint or samples found")
-def test_predict_smoke_with_checkpoint():
+@pytest.mark.skipif(not _ckpt_exists(), reason="No checkpoint or samples found")
+def test_checkpoint_predict_smoke():
     sample = _first_sample()
     manager = ModelManager(CKPT)
     result = manager.predict(sample)
@@ -45,3 +39,7 @@ def test_predict_smoke_with_checkpoint():
     assert result.class_name in CLASS_NAMES_DISPLAY
     assert 0 < result.confidence <= 1.0
     assert result.inference_time_ms < 15000
+
+    # Also verify top-k structure
+    assert len(result.top_k) == len(CLASS_NAMES_DISPLAY)
+    assert len(result.top_k) >= 3

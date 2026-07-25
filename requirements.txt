@@ -21,14 +21,12 @@ albumentations==1.4.18
 opencv-python==4.10.0.84
 Pillow==10.4.0
 
-# Explainability
+# Explainability — PyPI name is "grad-cam" (import pytorch_grad_cam)
 grad-cam==1.5.2
-pytorch-gradcam-plusplus>=0.1.0  # Advanced Grad-CAM methods
 
-# Production deployment
+# Optional ONNX export (src/onnx_export.py)
 onnx>=1.16.0
 onnxruntime>=1.19.0
-onnxruntime-tools>=1.7.0
 
 # Bonus: Image captioning
 transformers>=4.30.0

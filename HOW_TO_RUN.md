@@ -36,9 +36,9 @@ make evaluate     # python src/evaluate.py
 make gradcam      # python src/gradcam.py
 make app          # streamlit run app/app.py
 make test         # pytest tests/ -v
-make lint         # ruff check src/ && mypy src/
-make split        # python src/generate_splits.py (legacy, prefer prepare_data.py)
-make train-head   # python src/train_head.py (head-only, low-RAM machines)
+make lint         # ruff check src/ app/ tests/
+make split        # python src/prepare_data.py (data download + split)
+make validate     # python src/prepare_data.py --per-class 10 (lightweight check)
 ```
 
 ## Colab One-Click Pipeline
@@ -50,7 +50,7 @@ it and unzip into the repo root.
 
 ## Project Structure (Orchestrator Reference)
 
-- `src/` — main Python modules (prepare_data, train, evaluate, gradcam, inference, bonus, utils, dataset, augmentations, model, preprocess)
+- `src/` — main Python modules (prepare_data, train, evaluate, gradcam, inference, bonus, utils, dataset, model, tta, onnx_export)
 - `app/` — Streamlit web demo
 - `configs/config.yaml` — single source of truth for hyperparameters + paths
 - `notebooks/Galaxy_X_Colab.ipynb` — one-click GPU pipeline (recommended)

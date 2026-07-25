@@ -5,6 +5,7 @@ Helper functions for training, evaluation, and inference.
 """
 
 import os
+import sys
 import json
 import random
 import logging
@@ -19,6 +20,35 @@ import yaml
 from sklearn.metrics import f1_score
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Data check (fail-loud)
+# ---------------------------------------------------------------------------
+
+def check_data_exists(data_dir: str = "data/processed") -> None:
+    """Check that at least one image exists in train/val/test splits.
+
+    Exits with code 1 and a clear message if no images are found.
+    """
+    missing = []
+    for split in ("train", "val", "test"):
+        split_dir = Path(data_dir) / split
+        if not split_dir.is_dir():
+            missing.append(split)
+            continue
+        image_files = list(split_dir.rglob("*.png")) + list(split_dir.rglob("*.jpg")) + list(split_dir.rglob("*.jpeg"))
+        if not image_files:
+            missing.append(split)
+    if missing:
+        msg = (
+            f"No images found in data/processed ({', '.join(missing)} splits empty or missing).\n"
+            "Run: python src/prepare_data.py  OR use data/samples demo via streamlit."
+        )
+        print(msg, file=sys.stderr)
+        sys.exit(1)
+        sys.exit(1)
+
 
 # ---------------------------------------------------------------------------
 # Reproducibility
