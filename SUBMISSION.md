@@ -2,9 +2,9 @@
 
 **SCALE x ODYSSEY** | Astronomical image classifier (EfficientNet-B3, 5 classes)
 **GitHub repo:** https://github.com/Srujan0798/Galaxy-X-os
-**Latest release:** [v1.0](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0)
+**Latest release:** [v1.2](https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.2)
 **One-page report:** [`REPORT.md`](REPORT.md) / [`REPORT.pdf`](REPORT.pdf)
-**Scoreboard:** [`docs/SCOREBOARD.md`](docs/SCOREBOARD.md)
+**Model card:** [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md)
 
 Classes: Spiral Galaxy · Elliptical Galaxy · Nebula · Star Cluster · Planetary Object
 

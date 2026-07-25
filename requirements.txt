@@ -1,9 +1,9 @@
 # SCALE x ODYSSEY -- Python Dependencies
 
-# Core PyTorch (adjust CUDA version for your system)
+# Core PyTorch (adjust CUDA version for your system; Cloud uses CPU wheel)
 # NOTE: installed versions in this environment may differ; verify with `pytest tests/ -v`.
-torch==2.4.1
-torchvision==0.19.1
+torch>=2.4.1,<3.0
+torchvision>=0.19.1,<1.0
 
 # Real galaxy data source (Galaxy10 DECaLS/SDSS)
 astroNN
