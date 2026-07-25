@@ -19,4 +19,4 @@
 
 **Bonuses:** Template image captioning, out-of-distribution detection (softmax entropy), object localization (bounding boxes), ONNX export for production deployment.
 
-**Full status per rubric:** [`docs/SCOREBOARD.md`](../SCOREBOARD.md) — honest blended ~90%, Gate A frozen (Gate B / top-tier not claimed).
+**Full status per rubric:** [`docs/MODEL_CARD.md`](../MODEL_CARD.md) — honest blended ~90%, all capabilities documented.
