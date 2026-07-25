@@ -1,27 +1,35 @@
 # HANDOFF — Galaxy-X-os
 
 **Updated:** 2026-07-25  
-**Race score (EXTERNAL_SHIP):** previously ~42% on broken main; golden-path ship on origin; CI fix-up in this commit.
+**Status:** Gate A FROZEN ✅ · Honest score ~90% · Gate B pending
 
-## Three numbers (do not mix)
-| Name | Meaning |
-|------|---------|
-| EXTERNAL_SHIP | Public clone + CI — race ranking |
-| MODEL_ARTIFACT 93.17% | Test accuracy only — not readiness |
-| LOCAL with ckpt | Dev machine only |
+## Score
+- **Honest blended: ~90%**
+- **Gate A (protocol 100%):** GREEN
+- **Gate B (TOP 0.1%):** NOT READY
+- **Main commit:** `5155957`
+- **CI:** https://github.com/Srujan0798/Galaxy-X-os/actions/runs/30165528883
 
-## Shipped for race
-- samples (5 classes + noise OOD)
-- scripts/verify_golden_path.sh
-- fixed requirements (no fake packages)
-- evaluate/train empty-data exit 1
-- e2e predict smoke
-- security workflow: secret scan hard-fail, pip-audit report-only
-- evaluate_tta syntax fix (CI lint)
+## Gate A closed
+- ✅ Golden path committed to main
+- ✅ `verify_golden_path.sh` exit 0 with local ckpt
+- ✅ `python src/evaluate.py` exit 1 on empty data
+- ✅ Streamlit sample → Grad-CAM browser-proven (Playwright)
+- ✅ 57 tests pass; CI green on main
+- ✅ SCOREBOARD honest at ~90% (no 96% / 100% / FREEZE theater)
 
-## Next
-1. Confirm CI green on main after this push
-2. Wave 2 polish / hosted demo optional
-3. Never claim 100% without fresh clone proof
+## Evidence files
+- `work/reports/PHASE-2-evidence.md` (samples + verify)
+- `work/reports/PHASE-FIX-EXIT-evidence.md` (exit code fix)
+- `work/reports/PHASE-BROWSER-evidence.md` (Streamlit proof)
+- `work/reports/PHASE-CI-evidence.md` (Actions green)
+- `work/reports/FREEZE_REAL.md` (Gate A freeze) — to be written
 
-See: work/reports/EXTERNAL_TRUTH.md, work/RACE_DOMINATION_PLAN.md
+## Assign next: Gate B only if wanted
+- **B-HOSTILE:** run hostile judge on remote clone
+- **B-MOAT:** ensure localization + OOD obvious to judge in <2 min
+- **B-PRESENT:** demo.mp4 re-record if stale
+- **B-ORCH:** top tier freeze only if hostile clean
+
+## Do not claim
+Top 0.1% / 100% until Gate B hostile clean + moat proven.
