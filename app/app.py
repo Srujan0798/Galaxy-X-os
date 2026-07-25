@@ -385,7 +385,7 @@ def main():
             st.subheader("🧪 OOD / Anomaly Detection Demo")
             st.caption("Click below to test the model on **synthetic random noise** (out-of-distribution). "
                        "The anomaly detector should flag this as a potential OOD/rare object.")
-            if st.button("🌀 Try noise sample", key="btn_noise", use_container_width=True):
+            if st.button("🌀 Try noise sample", key="btn_ood_noise_demo", use_container_width=True):
                 noise_path = str(noise_images[0])
                 st.markdown("---")
                 st.subheader("🖼️ Noise Image")
