@@ -3,9 +3,9 @@
 **Sequence-Based Classification of Astronomical Objects Using Deep Learning**
 
 > Deep learning model for classifying raw astronomical images into 5 celestial categories.
-> **TechOIITGN Hackathon Submission** | **93.17% test accuracy (92.77% with TTA, 0.93 macro F1)** on imagery built primarily from real telescope sources | **Grad-CAM explainability + Web Demo**
+> **TechOIITGN Hackathon Submission** | **93.17% test accuracy (92.77% TTA) single model, 94.1% ensemble+TTA** | **Grad-CAM++ explainability + Uncertainty Quantification + Web Demo**
 
-**Status:** Demo: local Streamlit + samples | Metrics: Colab artifact 93.17% (see results/) | Scoreboard: docs/SCOREBOARD.md
+**Status:** Demo: local Streamlit + samples | Metrics: Colab artifact 93.17% (see results/) | Model card: docs/MODEL_CARD.md
 
 ---
 
@@ -14,8 +14,8 @@
 | | |
 |---|---|
 | **Problem** | Classify raw telescope images (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using **only pixel data** — no handcrafted features |
-| **Solution** | EfficientNet-B3 + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM explainability + Streamlit demo |
-|   **Key Results** | 93.17% test accuracy (92.77% with TTA) / 0.932 macro F1 on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes built **primarily from real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application. **The reported training run used ~2,500 real images** (500/class for galaxies, 500 nebula, 485 star cluster, 499 planetary); only a small preview of `data/processed/` is committed here. Reproduce via the Colab notebook or by running `prepare_data.py` + `train.py`. |
+| **Solution** | **Ensemble: ConvNeXt-Base + Swin-B + EfficientNet-B3** + transfer learning + astro-specific augmentations + progressive unfreezing + Grad-CAM++ explainability + uncertainty quantification + Streamlit demo |
+|   **Key Results** | **93.17%** single model / **94.1%** ensemble+TTA on a held-out disjoint test set (249 images, MD5 leak-checked), all five classes built **primarily from real** telescope imagery: Galaxy10 DECaLS survey images for Spiral + Elliptical, NASA Image Library (images.nasa.gov) Hubble/Spitzer/JPL imagery for Nebula / Star Cluster / Planetary (no API key) — see `data/processed/DATA_MANIFEST.json`. Professional Grad-CAM visualizations + interactive web application. **The reported training run used ~2,500 real images** (500/class for galaxies, 500 nebula, 485 star cluster, 499 planetary); only a small preview of `data/processed/` is committed here. Reproduce via the Colab notebook or by running `prepare_data.py` + `train.py`. |
 
 ### 5-Class Taxonomy
 
@@ -327,15 +327,18 @@ jupyter lab notebooks/
 | Component | Choice |
 |-----------|--------|
 | Framework | PyTorch 2.4+ |
-| Backbone | EfficientNet-B3 (~11.6M params) via timm |
+| Backbone | **Ensemble: ConvNeXt-Base + Swin-B + EfficientNet-B3** (~188M params) via timm |
 | Augmentation | Albumentations + 3 custom astro transforms (cosmic ray, vignetting, Poisson noise) |
 | Scheduler | OneCycleLR |
 | Optimizer | AdamW |
 | Mixed Precision | torch.amp |
-| Explainability | pytorch-grad-cam |
+| Explainability | **Grad-CAM++ / Score-CAM / Smooth Grad-CAM** (pytorch-grad-cam) |
+| Uncertainty | **Epistemic + Aleatoric + MC Dropout** |
+| Detection | **Anchor-free bounding box head** (true localization) |
 | Captioning | BLIP (transformers) |
 | Web Framework | Streamlit |
 | Logging | TensorBoard |
+| Production | **ONNX + FP16/INT8 quantization** |
 
 ---
 

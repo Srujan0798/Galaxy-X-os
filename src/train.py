@@ -118,20 +118,32 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="SCALE x ODYSSEY Training")
     parser.add_argument("--config", default="configs/config.yaml", help="Path to YAML config")
+    parser.add_argument("--backbone", type=str, default=None, help="Override backbone (convnext_base, swin_base, efficientnet_b3)")
+    parser.add_argument("--checkpoint", type=str, default=None, help="Override checkpoint save path")
     parser.add_argument("--epochs", type=int, default=None, help="Override number of epochs")
     parser.add_argument("--lr", type=float, default=None, help="Override learning rate")
     parser.add_argument("--batch-size", type=int, default=None, help="Override batch size")
+    parser.add_argument("--label-smoothing", type=float, default=None, help="Override label smoothing")
+    parser.add_argument("--focal-gamma", type=float, default=None, help="Override focal loss gamma")
     parser.add_argument("--device", default=None, choices=["cuda", "mps", "cpu"], help="Force device")
     parser.add_argument("--seed", type=int, default=None, help="Override random seed")
     args = parser.parse_args()
 
     config = load_config(args.config)
+    if args.backbone is not None:
+        config["model"]["backbone"] = args.backbone
+    if args.checkpoint is not None:
+        config["eval_checkpoint"] = args.checkpoint
     if args.epochs is not None:
         config["training"]["num_epochs"] = args.epochs
     if args.lr is not None:
         config["training"]["lr"] = args.lr
     if args.batch_size is not None:
         config["training"]["batch_size"] = args.batch_size
+    if args.label_smoothing is not None:
+        config["training"]["label_smoothing"] = args.label_smoothing
+    if args.focal_gamma is not None:
+        config["training"]["focal_gamma"] = args.focal_gamma
     if args.seed is not None:
         config["seed"] = args.seed
 
@@ -177,7 +189,15 @@ def main():
 
     # Loss + weights
     class_weights = load_class_weights(data_dir, device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights, label_smoothing=label_smoothing)
+    # Loss: Focal Loss + Label Smoothing
+    focal_gamma = config["training"].get("focal_gamma", 2.0)
+    from utils import FocalLoss, LabelSmoothingCrossEntropy
+    if focal_gamma > 0:
+        criterion = FocalLoss(gamma=focal_gamma, alpha=0.25)
+        logger.info(f"Using Focal Loss (γ={focal_gamma})")
+    else:
+        criterion = LabelSmoothingCrossEntropy(smoothing=label_smoothing)
+        logger.info(f"Using Label Smoothing CrossEntropy (ε={label_smoothing})")
 
     # Optimizer (will be recreated during unfreezing)
     optimizer = setup_phase1_optimizer(model, lr, weight_decay)
