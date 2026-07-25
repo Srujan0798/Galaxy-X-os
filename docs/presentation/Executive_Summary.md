@@ -7,7 +7,7 @@
 
 **The Problem:** Classify raw astronomical images into 5 celestial categories (Spiral Galaxy, Elliptical Galaxy, Nebula, Star Cluster, Planetary Object) using only pixel data — no handcrafted astrophysical features — while providing interpretable predictions and running on consumer hardware.
 
-**The Data:** Multi-source real astronomical imagery — Galaxy10 DECaLS for galaxy classes, NASA Image Library for the rest — assembled into a 250-image held-out disjoint test set with documented provenance (`data/processed/DATA_MANIFEST.json`).
+**The Data:** Multi-source imagery built primarily from real astronomical sources — Galaxy10 DECaLS for galaxy classes, NASA Image Library for the rest (with a labelled procedural fallback where real coverage was short) — assembled into a 249-image held-out disjoint test set with documented provenance (`data/processed/DATA_MANIFEST.json`).
 
 **The Model:** EfficientNet-B3 backbone (~11.6M parameters, ImageNet-pretrained) with a 3-layer custom classification head (BatchNorm + progressive dropout). Training uses OneCycleLR, label smoothing (0.1), mixed precision, progressive unfreezing (backbone frozen 3 epochs, then full fine-tune), and 3 custom astronomy augmentations (cosmic ray simulation, telescope vignetting, Poisson noise).
 
@@ -19,4 +19,4 @@
 
 **Bonuses:** Template image captioning, out-of-distribution detection (softmax entropy), object localization (bounding boxes), ONNX export for production deployment.
 
-**Full status per rubric:** [`docs/SCOREBOARD.md`](../SCOREBOARD.md) — honest blended ~96% (Phases 0–8 green).
+**Full status per rubric:** [`docs/SCOREBOARD.md`](../SCOREBOARD.md) — honest blended ~90%, Gate A frozen (Gate B / top-tier not claimed).

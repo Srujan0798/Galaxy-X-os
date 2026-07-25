@@ -59,4 +59,4 @@ Offline template captioning + BLIP option, softmax-entropy anomaly/OOD detection
 
 ## Environment gotchas
 - Train on GPU (Colab) — the 8GB MacBook hangs on full fine-tune.
-- `best_model.pth` (~141 MB) exceeds GitHub's 100 MB limit → not committed; reproduce via notebook or grab from the v1.0 Release.
+- `best_model.pth` (~134 MB) exceeds GitHub's 100 MB limit → not committed; reproduce via notebook or grab from the v1.0 Release.

@@ -1,5 +1,10 @@
 # TOP TIER FREEZE — Gate B Evidence
 
+> **SUPERSEDED:** the ~96% figure below was rejected as scoreboard inflation by
+> `work/reports/HOSTILE_REAUDIT.md` the same day. The authoritative honest score is
+> **~90%** — see `work/reports/FREEZE_REAL.md` and `docs/SCOREBOARD.md`. Kept here
+> only as a historical audit-trail artifact; do not cite the 96% number.
+
 **Date:** 2026-07-25  
 **Project:** Galaxy-X-os  
 

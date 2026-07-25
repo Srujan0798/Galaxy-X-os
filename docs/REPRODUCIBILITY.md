@@ -85,7 +85,7 @@ All committed evaluation artifacts are pinned by SHA256 in
 
 ## Checkpoint integrity
 
-`checkpoints/best_model.pth` (~141 MB) exceeds GitHub's 100 MB limit, so it is
+`checkpoints/best_model.pth` (~134 MB) exceeds GitHub's 100 MB limit, so it is
 **not committed**. Two paths to get it:
 
 1. **Reproduce** (guaranteed): run the Colab notebook or

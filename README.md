@@ -31,6 +31,8 @@
 
 ## Quick Start (Demo)
 
+Requires **Python 3.10–3.12** (torch==2.4.1 has no wheel for 3.13+; use `pyenv` or `python3.11 -m venv .venv` if your system default is newer).
+
 Get the demo running in 3 steps:
 
 ```bash
@@ -79,7 +81,7 @@ python src/bonus.py --image path/to/image.png
 
 > **One-click Colab:** open [`notebooks/Galaxy_X_Colab.ipynb`](notebooks/Galaxy_X_Colab.ipynb) to run the whole pipeline on a free GPU (this is how the reported model was trained).
 >
-> **Dataset & checkpoint note:** the reported 93.17% run used ~2,500 real images and a ~141 MB `best_model.pth`. Because GitHub's 100 MB file limit blocks the checkpoint and the full dataset, neither is committed. See [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for hash verification.
+> **Dataset & checkpoint note:** the reported 93.17% run used ~2,500 real images and a ~134 MB `best_model.pth`. Because GitHub's 100 MB file limit blocks the checkpoint and the full dataset, neither is committed. See [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for hash verification.
 
 ---
 
@@ -128,7 +130,7 @@ Galaxy-X-os/
 | **Classification Performance** | 40% | — | 93.17% accuracy (92.77% with TTA), 0.932 macro F1 (0.928 TTA), confusion matrix, per-class F1, classification report |
 |   **Model Efficiency** | 15% | — | ~11.6M parameters, mixed precision (torch.amp), per-image inference well under the 5 s requirement (exact latency depends on hardware; see `REPORT.md`) |
 | **Explainability & Visualization** | 15% | — | Grad-CAM 3-panel figures (Original / True CAM / Predict CAM), 15-sample summary grid, confidence analysis |
-| **Innovation / Bonus Features** | 15% | — | Streamlit web app + BLIP captioning + anomaly detection + astro-specific augmentations |
+| **Innovation / Bonus Features** | 15% | — | Streamlit web app + template captioning (optional BLIP) + anomaly detection + astro-specific augmentations |
 | **Documentation & Presentation** | 15% | — | Full README, modular code, 3 Jupyter notebooks, reproducible configs, demo video |
 
 ---

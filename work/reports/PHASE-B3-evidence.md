@@ -9,7 +9,7 @@
 60-second judge talk track script covering:
 - Hook: "We are Galaxy-X-os, a 5-class astronomical classifier"
 - Problem → EfficientNet-B3 transfer learning with custom astro augmentations
-- Key result: 93.17% accuracy, 0.932 macro F1 on 250-image held-out test set
+- Key result: 93.17% accuracy, 0.932 macro F1 on 249-image held-out test set
 - Grad-CAM explainability in Streamlit app
 - Demo: 3 commands, sample buttons, ~10 s to prediction
 - Bonuses: caption, OOD, localization, ONNX

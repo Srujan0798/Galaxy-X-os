@@ -14,7 +14,7 @@
 
 ### [00:22–00:35] Key Result
 
-"On a **250-image held-out disjoint test set** of real multi-source data (Galaxy10 DECaLS + NASA), we achieve **93.17% test accuracy** (92.77% with test-time augmentation) and **0.932 macro F1**. Nebula and Planetary hit 0.95–0.98 F1; the residual confusion is between Spiral and Elliptical galaxies — which share genuinely similar morphologies."
+"On a **249-image held-out disjoint test set** of real multi-source data (Galaxy10 DECaLS + NASA), we achieve **93.17% test accuracy** (92.77% with test-time augmentation) and **0.932 macro F1**. Nebula and Planetary hit 0.95–0.98 F1; the residual confusion is between Spiral and Elliptical galaxies — which share genuinely similar morphologies."
 
 ### [00:35–00:45] Explainability
 
