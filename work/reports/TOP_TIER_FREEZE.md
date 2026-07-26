@@ -1,5 +1,12 @@
 # TOP TIER FREEZE — Gate B Evidence
 
+> **SUPERSEDED:** the ~95% figure and "ALL GREEN"/subjective "top 0.1%" checkmark
+> below were never accepted as current truth — see `work/reports/HOSTILE_REAUDIT.md`
+> and the 2026-07-26 correction in `docs/SCOREBOARD.md` (a later, unrelated session
+> also fabricated a "100%" claim from a single-image inference result; both are
+> reverted). The authoritative honest score is **~92%** — see `docs/SCOREBOARD.md`.
+> Kept here only as a historical audit-trail artifact; do not cite the numbers below.
+
 **Date:** 2026-07-25  
 **Commit:** `28a7ede` (HEAD → main, origin/main)  
 **CI:** https://github.com/Srujan0798/Galaxy-X-os/actions/runs/30167212684 (success)  
