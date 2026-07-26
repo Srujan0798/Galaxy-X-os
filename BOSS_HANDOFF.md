@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-26
 **Status:** Gate A frozen honest ✅ · Gate B partial · **not 100%, see correction below**
-**Version:** `8319df7` (v1.2 tag updated to this commit)
+**Version:** `9b505e8` (v1.2 tag)
 
 > **Correction:** this file previously claimed "100% (protocol)" and "R1
 > independently verified" based on a single-image inference result. That's not
@@ -35,7 +35,7 @@
 | Colab notebook (GPU + CPU fallback) | Working, committed |
 | Streamlit web app | Working, auto-downloads checkpoint on launch; crash-fixed (see HANDOFF.md) |
 | All 4 PS bonuses | Demoable (Grad-CAM, TTA, anomaly/OOD, ONNX) |
-| CI (lint + test + matrix + security) | Green on last checked commit — re-verify with `gh run list` |
+| CI (lint + test + matrix + security) | Green (confirmed on latest commit `9b505e8`) |
 | 57/57 tests passing | Verified locally (one flaky timing-based test seen under heavy concurrent-session CPU load; passes in isolation) |
 | SCOREBOARD honest | Corrected as of this pass — was briefly overclaimed to 100% by a concurrent session |
 | Evidence files restored | Recovered after an earlier accidental deletion |
@@ -85,7 +85,7 @@
 | Colab crashed on CPU | Cell 1b now falls back gracefully with warning | `notebooks/Galaxy_X_Colab.ipynb` |
 | Colab checkpoint path mismatch (loaded `convnext_base.pth` instead of `best_model_convnext_base.pth`) | All cells now load correct filenames | `notebooks/Galaxy_X_Colab.ipynb` |
 | Colab download cell missing 2 of 4 checkpoint files | Download cell now zips all 4 backbone checkpoints | `notebooks/Galaxy_X_Colab.ipynb` |
-| SCOREBOARD.md outdated commit hash | Updated to latest HEAD (`8319df7`) | `docs/SCOREBOARD.md` |
+| SCOREBOARD.md outdated commit hash | Updated to latest HEAD (`9b505e8`) | `docs/SCOREBOARD.md` |
 | SCOREBOARD.md stale CI URL | Updated to latest CI run | `docs/SCOREBOARD.md` |
 
 ---

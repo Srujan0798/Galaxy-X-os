@@ -400,4 +400,4 @@ Pretrained weights from TIMM (Apache 2.0) and BLIP (BSD-3-Clause) used with prop
 
 ---
 
-**Ready for submission!**
+**Status:** Honest ~92% blended — Gate A GREEN ✅, Gate B PARTIAL — see [`docs/SCOREBOARD.md`](docs/SCOREBOARD.md).

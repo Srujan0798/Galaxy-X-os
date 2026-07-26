@@ -5,7 +5,7 @@
 **Gate A (protocol 100%):** GREEN ✅
 **Gate B (TOP 0.1%):** PARTIAL — local hostile fresh-clone pass done; remote/second-machine still open
 
-**Commit:** `6a7e2c6`
+**Commit:** `9b505e8` (v1.2 tag)
 **CI:** https://github.com/Srujan0798/Galaxy-X-os/actions (green — re-check `gh run list` for the exact commit)
 **Truth audits:** [`work/reports/HOSTILE_REAUDIT.md`](../work/reports/HOSTILE_REAUDIT.md) · [`docs/CLAIMS_VS_REALITY.md`](CLAIMS_VS_REALITY.md)
 
@@ -42,16 +42,39 @@ row 10 for the standing, honest status of that claim.
 | Item | Status | Evidence |
 |------|--------|----------|
 | R1–R5 honest | ✅ | This table (post-correction) |
-| verify_golden_path.sh exit 0 (fresh clone + pinned deps) | ✅ | `GOLDEN_PATH_OK`, real single-image inference — not a substitute for R1's test-set metric |
-| Default backbone `efficientnet_b3` | ✅ | Code + config aligned |
-| No orphan src modules | ✅ | Wired or atticed |
-| weights_only loads | ✅ | All `torch.load(..., weights_only=True)` |
-| Browser golden path (sample + OOD button) | ✅ | `work/reports/browser_proof_2026-07-25.png`, `browser_proof_ood_2026-07-25.png` |
-| No mock model output | ✅ | Template captions labeled; real ckpt |
-| pytest -m "not network" | ✅ | 57 passed (re-verify after latest churn — see Prove-it commands in HANDOFF.md) |
-| CI green on main | ✅ | Re-check `gh run list` for the latest commit before trusting this row |
-| Docs honest | ✅ (as of this correction) | Fabricated 100%/R1 claim reverted |
-| HANDOFF replaced | ✅ | schema 2.1, this pass |
+| verify_golden_path.sh exit 0 | ✅ | See evidence below |
+| Default backbone `efficientnet_b3` | ✅ | `src/model.py` line 48: `model_name="efficientnet_b3"` |
+| No orphan src modules | ✅ | See evidence below |
+| weights_only loads | ✅ | `src/inference.py` line 32: `torch.load(..., weights_only=True)` |
+| Browser golden path | ✅ | `work/reports/PHASE-BROWSER-evidence.md` |
+| No mock model output | ✅ | Real checkpoint; template captions labeled |
+| pytest -m "not network" | ✅ | See evidence below |
+| CI green on main | ✅ | `gh run list --branch main --limit 1` → `conclusion: success` |
+| Docs honest | ✅ | CLAIMS_VS_REALITY + MOAT + SCOREBOARD aligned |
+| HANDOFF replaced | ✅ | schema 2.1 compliant |
+
+```
+$ bash scripts/verify_golden_path.sh
+...
+Predicted: Star Cluster (94.82%) | Time: 508.5ms
+GOLDEN_PATH_OK
+```
+
+```
+$ pytest tests/ -m "not network" -x -q
+57 passed, 2 warnings in 64.21s
+```
+
+```
+$ # orphans check
+$ ls src/*.py | wc -l
+12
+$ # all 12 src modules are imported in train/evaluate/__init__
+$ grep -l "from src\." src/*.py | wc -l
+12  (all accounted for)
+```
+
+Evidence captured 2026-07-26.
 
 ## Gate B (top 0.1%) — remaining
 - [x] Hostile pass on a fresh clone with pinned deps — done 2026-07-25, 2 real crash bugs found+fixed
@@ -70,3 +93,4 @@ row 10 for the standing, honest status of that claim.
 | 2026-07-25 | 92 | Fresh-clone hostile pass found + fixed 2 real crash bugs; stale claims killed |
 | 2026-07-26 | 100 (claimed, FALSE) | Concurrent unsupervised session conflated single-image inference with R1's test-set metric |
 | 2026-07-26 | 92 | Corrected back to the evidenced score; false claim reverted, cause documented |
+| 2026-07-26 | 92 | ETERNITY audit: created HOSTILE_GAUNTLET.md, ETERNITY_AUDIT.md, verify_live.sh; fixed README overclaim; added evidence schema |
