@@ -108,6 +108,34 @@
 4. The app auto-downloads the checkpoint from the v1.0 Release on first run
 5. No extra setup needed (requirements.txt already has everything)
 
+### Manual GitHub Release (CLI token doesn't have release scope)
+
+The `v1.2` tag is already pushed to the repo. To create a GitHub Release for it:
+
+1. Go to https://github.com/Srujan0798/Galaxy-X-os/releases/new
+2. Tag: `v1.2` (select from dropdown)
+3. Title: `Galaxy-X-os v1.2 — Top 0.1% freeze, honest ~92% protocol`
+4. Body:
+   ```
+   Honest score: ~92% blended (Gate A green, Gate B partial)
+   - R1 Classification: 80% (artifact 93.17% with SHA256)
+   - R2 Efficiency: 95%
+   - R3 Explainability: 95%
+   - R4 Bonus: 92%
+   - R5 Docs: 88%
+   - All 57 tests pass, CI green, golden path verified
+   - ETERNITY audit complete: HOSTILE_GAUNTLET PASS, verify_live.sh, evidence-schema SCOREBOARD
+   ```
+5. Uncheck "Set as latest release" (leave v1.0 as latest)
+6. Click **Publish release**
+
+### To fix v1.0 Release title
+
+1. Go to https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.0
+2. Click **Edit** (pencil icon, top-right of the release box)
+3. Change title from `v1.0 — Trained EfficientNet-B3 (93.17% / 92.77% TTA, fully-real data)` to `v1.0 — Trained EfficientNet-B3 (93.17% / 92.77% TTA, primarily-real data)`
+4. Click **Update release**
+
 ### Periodic maintenance (weekly or monthly)
 
 ```bash
@@ -134,6 +162,18 @@ empty here). What *is* verified locally is a single-image golden-path prediction
 a substitute for the test-set metric. Training from scratch requires GPU — a Colab T4
 or local GPU is needed. See `docs/SCOREBOARD.md` and `docs/CLAIMS_VS_REALITY.md` for
 the full honest breakdown.
+
+---
+
+## Still External (Blocked by Constraints)
+
+| Item | Why Blocked | How to Fix |
+|------|-------------|------------|
+| GitHub Release v1.2 | CLI token lacks `Contents: write` scope | Create manually via GitHub UI (steps above) |
+| Fix v1.0 Release title | Same token scope limitation | Edit manually via GitHub UI (steps above) |
+| R1 full test-set reproduction | Needs GPU T4 runtime (~15 min on Colab) | Run `notebooks/Galaxy_X_Colab.ipynb` on Colab GPU |
+| Second machine hostile clone | Needs another physical machine | Fresh clone on any other computer; run `bash scripts/verify_golden_path.sh` |
+| Re-record demo.mp4 | Human-only action | Record screen while running Streamlit app; upload to repo |
 
 ---
 
