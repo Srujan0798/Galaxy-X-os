@@ -89,3 +89,4 @@ results.zip
 
 # Playwright MCP cache
 .playwright-mcp/
+.kilo
