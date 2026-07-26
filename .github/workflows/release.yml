@@ -1,0 +1,39 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate release notes
+        id: notes
+        run: |
+          PREV_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
+          if [ -z "$PREV_TAG" ]; then
+            echo "notes=First release" >> "$GITHUB_OUTPUT"
+          else
+            LOG=$(git log "$PREV_TAG".."$GITHUB_REF_NAME" --oneline --no-decorate 2>/dev/null | head -50)
+            echo "notes<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$LOG" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Galaxy-X-os ${{ github.ref_name }}
+          body: |
+            Galaxy-X-os ${{ github.ref_name }}
+
+            ${{ steps.notes.outputs.notes }}
+          draft: false
+          prerelease: false
