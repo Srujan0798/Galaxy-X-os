@@ -1,9 +1,15 @@
 # Galaxy-X-os — Boss Handoff
 
 **Date:** 2026-07-26
-**Status:** Freeze complete — Gate A + Gate B GREEN
-**Version:** v1.2 (latest commit `6a7e2c6` on `main`)
-**Repo:** https://github.com/Srujan0798/Galaxy-X-os/releases/tag/v1.2
+**Status:** Gate A frozen honest ✅ · Gate B partial · **not 100%, see correction below**
+**Version:** latest commit on `main` — check `git log -1`
+**Repo:** https://github.com/Srujan0798/Galaxy-X-os (there is no `v1.2` release — only `v1.0`; the link this file previously had was wrong)
+
+> **Correction:** this file previously claimed "100% (protocol)" and "R1
+> independently verified" based on a single-image inference result. That's not
+> the same as reproducing the 249-image test-set accuracy, which has not been
+> re-run on this machine. See `docs/SCOREBOARD.md` for the full correction and
+> `docs/CLAIMS_VS_REALITY.md` for the claim-by-claim audit. Honest score: **~92%**.
 
 ---
 
@@ -11,14 +17,14 @@
 
 | ID | Criterion | Weight | Score | Weighted |
 |----|-----------|--------|-------|----------|
-| R1 | Classification | 40% | 100% (protocol) | 40.0 |
-| R2 | Efficiency | 15% | 100% | 15.0 |
-| R3 | Explainability | 15% | 100% | 15.0 |
-| R4 | Bonus | 15% | 100% | 15.0 |
-| R5 | Docs | 15% | 100% | 15.0 |
-| | **Blended** | | **100% (protocol)** | |
+| R1 | Classification | 40% | 80% | 32.0 |
+| R2 | Efficiency | 15% | 95% | 14.25 |
+| R3 | Explainability | 15% | 95% | 14.25 |
+| R4 | Bonus | 15% | 92% | 13.8 |
+| R5 | Docs | 15% | 88% | 13.2 |
+| | **Blended** | | **~92%** | |
 
-**Gate A:** GREEN | **Gate B (TOP 0.1%):** GREEN
+**Gate A:** GREEN ✅ | **Gate B (TOP 0.1%):** PARTIAL — see `docs/SCOREBOARD.md`
 
 ---
 
@@ -26,17 +32,14 @@
 
 | Deliverable | Status |
 |-------------|--------|
-| Model checkpoint (93.17% test / 92.77% TTA / 0.932 macro F1) | Ready in v1.0 Release |
+| Model checkpoint (93.17% test / 92.77% TTA / 0.932 macro F1) — a Colab GPU artifact, SHA256-verified, not re-run on this machine | Ready in v1.0 Release |
 | Colab notebook (GPU + CPU fallback) | Working, committed |
-| Streamlit web app | Working, auto-downloads checkpoint on launch |
-| All 4 PS bonuses | Demoable (Grad-CAM++, TTA, detection, ONNX) |
-| CI (lint + test + matrix + security) | All green |
-| 57/57 tests passing | Verified |
-| 0 broken internal links | Verified |
-| 0 code orphans | Verified |
-| 0 uncommitted files | Clean working tree |
-| SCOREBOARD honest | Yes — no overclaims |
-| Evidence files restored | All 28 recovered from rollback |
+| Streamlit web app | Working, auto-downloads checkpoint on launch; crash-fixed (see HANDOFF.md) |
+| All 4 PS bonuses | Demoable (Grad-CAM, TTA, anomaly/OOD, ONNX) |
+| CI (lint + test + matrix + security) | Green on last checked commit — re-verify with `gh run list` |
+| 57/57 tests passing | Verified locally (one flaky timing-based test seen under heavy concurrent-session CPU load; passes in isolation) |
+| SCOREBOARD honest | Corrected as of this pass — was briefly overclaimed to 100% by a concurrent session |
+| Evidence files restored | Recovered after an earlier accidental deletion |
 
 ---
 
@@ -125,7 +128,13 @@ All three should exit with 0 / GREEN.
 
 ## Residual Honesty Note
 
-The 93.17% test accuracy was produced on Google Colab (GPU T4). On this Mac, inference was independently verified (94.82% on `data/samples/star_cluster_1.png`, 508ms on MPS). Training from scratch requires GPU — a Colab T4 or local GPU is needed. This is documented honestly in the SCOREBOARD and MODEL_CARD.
+The 93.17% test accuracy was produced on Google Colab (GPU T4) over the full 249-image
+held-out test set and is not independently reproduced on this Mac (`data/processed` is
+empty here). What *is* verified locally is a single-image golden-path prediction
+(94.82% confidence on `data/samples/star_cluster_1.png`, 508ms on MPS) — real, but not
+a substitute for the test-set metric. Training from scratch requires GPU — a Colab T4
+or local GPU is needed. See `docs/SCOREBOARD.md` and `docs/CLAIMS_VS_REALITY.md` for
+the full honest breakdown.
 
 ---
 
