@@ -65,6 +65,9 @@ if _SRC_DIR not in sys.path:
 _manager = None
 
 
+_CHECKPOINT_SHA256 = "e060f11b3fc5b5d25fb02d3ca1e6ee11dab5109e7f8d973aa894a494d9e8395a"
+
+
 def _ensure_checkpoint(checkpoint_path: str = "checkpoints/best_model.pth") -> str:
     """Return existing checkpoint path, or auto-download from Release for hosted demos."""
     p = Path(checkpoint_path)
@@ -72,17 +75,20 @@ def _ensure_checkpoint(checkpoint_path: str = "checkpoints/best_model.pth") -> s
         return str(p)
     p.parent.mkdir(parents=True, exist_ok=True)
     release_url = "https://github.com/Srujan0798/Galaxy-X-os/releases/download/v1.0/best_model.pth"
-    st.info("Downloading checkpoint from Release (one-time, ~141 MB)...")
+    st.info("Downloading checkpoint from Release (one-time, ~134 MB)...")
     try:
+        import hashlib
         import ssl
         import urllib.request
-        # Streamlit Cloud / some environments need unverified SSL for GitHub Releases
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+        import certifi
+        ctx = ssl.create_default_context(cafile=certifi.where())
         with urllib.request.urlopen(release_url, context=ctx, timeout=120) as response:
-            with open(p, "wb") as f:
-                f.write(response.read())
+            data = response.read()
+        digest = hashlib.sha256(data).hexdigest()
+        if digest != _CHECKPOINT_SHA256:
+            raise ValueError(f"checkpoint SHA256 mismatch: got {digest}, expected {_CHECKPOINT_SHA256}")
+        with open(p, "wb") as f:
+            f.write(data)
     except Exception as exc:
         p.unlink(missing_ok=True)
         raise FileNotFoundError(
