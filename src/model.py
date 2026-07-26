@@ -71,10 +71,10 @@ class AstroClassifier(nn.Module):
             backbone, pretrained=pretrained, num_classes=0, global_pool=""
         )
 
-        # Get feature dimension
-        cfg = BACKBONE_CONFIGS.get(backbone, {"features": self.backbone.num_features, "pool": "avg"})
-        in_features = cfg["features"]
-        self.pool_type = cfg["pool"]
+        # Get feature dimension; always trust timm's actual num_features
+        cfg = BACKBONE_CONFIGS.get(backbone, {"pool": "avg"})
+        self.pool_type = cfg.get("pool", "avg")
+        in_features = self.backbone.num_features
 
         # Unified classifier head
         self.classifier = nn.Sequential(
