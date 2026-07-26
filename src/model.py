@@ -21,11 +21,11 @@ BACKBONE_CONFIGS = {
     },
     "swin_base_patch4_window7_224": {
         "features": 1024,
-        "pool": "avg",
+        "pool": "token",
     },
     "swin_large_patch4_window7_224": {
         "features": 1536,
-        "pool": "avg",
+        "pool": "token",
     },
     "efficientnet_b3": {
         "features": 1536,
@@ -112,11 +112,14 @@ class AstroClassifier(nn.Module):
         if self.pool_type == "cls" and features.ndim == 3:
             # ViT: [B, N, C] -> take CLS token
             features = features[:, 0]
+        elif self.pool_type == "token" and features.ndim == 3:
+            # Swin: [B, H*W, C] -> mean pool over spatial
+            features = features.mean(dim=1)
         elif features.ndim == 4:
             # CNN: [B, C, H, W] -> handled by classifier's AdaptiveAvgPool
             pass
         elif features.ndim == 3:
-            # Swin: [B, H*W, C] -> pool
+            # Fallback: mean pool over spatial for any 3D features
             features = features.mean(dim=1)
         
         return self.classifier(features)
