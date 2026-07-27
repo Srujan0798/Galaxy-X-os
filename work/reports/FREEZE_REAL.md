@@ -33,5 +33,12 @@ A hostile judge cloning `main`, installing deps, downloading the v1.0 Release ch
 - No hosted demo URL
 - Gate B (top 0.1%) not attempted yet
 
+## Evidence
+```bash
+# Verified: pytest -m "not network" → 57 passed
+# Verified: verify_golden_path.sh → GOLDEN_PATH_OK
+# Verified: CI green on commit 5155957
+```
+
 ## Verdict
 **Gate A: ✅ REAL FREEZE** at honest ~90%.
