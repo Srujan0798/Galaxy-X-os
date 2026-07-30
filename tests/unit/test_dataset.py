@@ -4,6 +4,8 @@ import numpy as np
 
 from src.dataset import AstroDataset, get_train_transforms, get_val_transforms
 
+np.random.seed(42)
+
 
 def test_train_transforms_produce_tensor():
     t = get_train_transforms(224)
